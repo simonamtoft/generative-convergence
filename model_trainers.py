@@ -176,10 +176,10 @@ def train_draw(train_loader, val_loader, model, config):
             x_hat = torch.sigmoid(x_hat)
 
             # compute losses
-            reconstruction = torch.mean(loss_func(x_hat, x).sum(1))
-            kl = torch.mean(kld.sum(1))
-            # loss = reconstruction + alpha * kl
-            loss = reconstruction + kl
+            recon = torch.mean(loss_func(x_hat, x))
+            kl = torch.mean(kld)
+            # loss = recon + alpha * kl
+            loss = recon + kl
 
             # Update gradients
             loss.backward()
@@ -187,7 +187,7 @@ def train_draw(train_loader, val_loader, model, config):
             optimizer.zero_grad()
 
             # save losses
-            loss_recon.append(reconstruction.item())
+            loss_recon.append(recon.item())
             loss_kl.append(kl.item())
             loss_elbo.append(-loss.item())
         
@@ -196,7 +196,7 @@ def train_draw(train_loader, val_loader, model, config):
             'recon_train': torch.tensor(loss_recon).mean(),
             'kl_train': torch.tensor(loss_kl).mean(),
             'elbo_train': torch.tensor(loss_elbo).mean()
-        }, commit=True)
+        }, commit=False)
 
 
         # Evaluate on validation set
@@ -214,13 +214,13 @@ def train_draw(train_loader, val_loader, model, config):
                 x_hat = torch.sigmoid(x_hat)
                 
                 # Compute losses
-                reconstruction = torch.mean(loss_func(x_hat, x).sum(1))
-                kl = torch.mean(kld.sum(1))
-                # loss = reconstruction + alpha * kl 
-                loss = reconstruction + kl
+                recon = torch.mean(loss_func(x_hat, x))
+                kl = torch.mean(kld)
+                # loss = recon + alpha * kl
+                loss = recon + kl
 
                 # save losses
-                loss_recon.append(reconstruction.item())
+                loss_recon.append(recon.item())
                 loss_kl.append(kl.item())
                 loss_elbo.append(-loss.item())
             

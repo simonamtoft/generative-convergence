@@ -10,7 +10,7 @@ from vae.vae import VariationalAutoencoder
 
 # pick model to train
 # - vae, draw, flow
-MODEL_NAME = 'vae' 
+MODEL_NAME = 'draw' 
 
 # set device
 has_cuda = torch.cuda.is_available()
@@ -75,7 +75,7 @@ elif MODEL_NAME == 'draw':
     config['N'] = 12
 
     # instantiate model
-    model = DRAW(config, [2, 1]).to(device)
+    model = DRAW(config, [1, 2]).to(device)
 
     # perform training
     model_trainers.train_draw(train_loader, val_loader, model, config)
