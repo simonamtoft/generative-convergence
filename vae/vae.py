@@ -4,8 +4,8 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.nn import init
 
-from stochastic import GaussianSample
-from distributions import log_gaussian, log_standard_gaussian
+from .stochastic import GaussianSample
+from .distributions import log_gaussian, log_standard_gaussian
 
 
 class Encoder(nn.Module):

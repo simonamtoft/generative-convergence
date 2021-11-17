@@ -1,14 +1,10 @@
-# reference: 
-# https://github.com/simonamtoft/recurrence-and-attention-latent-variable-models/blob/main/models/draw.py
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.distributions import Normal
 from torch.distributions.kl import kl_divergence
 
-from attention import BaseAttention, FilterbankAttention
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+from .attention import BaseAttention, FilterbankAttention
 
 
 class DRAW(nn.Module):

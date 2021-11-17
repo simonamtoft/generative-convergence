@@ -13,7 +13,9 @@ from vae.vae import VariationalAutoencoder
 MODEL_NAME = 'vae' 
 
 # set device
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+has_cuda = torch.cuda.is_available()
+# device = torch.device('cuda' if has_cuda else 'cpu')
+device = 'cpu'
 
 # Define config
 config = {
@@ -23,7 +25,9 @@ config = {
     'batch_size': 64,
     'epochs': 10,
     'lr': 1e-3,
+    'optimizer': 'adam',
     'model': MODEL_NAME,
+    'device': device,
 }
 
 # get data
@@ -31,7 +35,8 @@ train_data = get_ffjord_data(config['dataset'], config['train_samples'])
 val_data = get_ffjord_data(config['dataset'], config['val_samples'])
 
 # Setup data loader
-kwargs = {'num_workers': 4, 'pin_memory': True} if torch.cuda.is_available() else {}
+# kwargs = {'num_workers': 4, 'pin_memory': True} if has_cuda else {}
+kwargs = {}
 train_loader = DataLoader(
     train_data,
     batch_size=config['batch_size'],
@@ -41,7 +46,7 @@ train_loader = DataLoader(
 val_loader = DataLoader(
     val_data,
     batch_size=config['batch_size'],
-    shuffle=True,
+    shuffle=False,
     **kwargs
 )
 
@@ -54,14 +59,13 @@ if MODEL_NAME == 'vae':
     config['as_beta'] = True
 
     # instantiate model
-    x_shape = None #???????????
-    model = VariationalAutoencoder(config, x_shape).to(device)
+    model = VariationalAutoencoder(config, 2).to(device)
 
     # perform training
-    model_trainers.train_vae(train_loader, model, config)
+    model_trainers.train_vae(train_loader, val_loader, model, config)
 elif MODEL_NAME == 'flow':
     model = None
-    model_trainers.train_flow(train_loader, model, config)
+    model_trainers.train_flow(train_loader, val_loader, model, config)
 elif MODEL_NAME == 'draw':
     # define some model specific config
     config['attention'] = 'base'
@@ -71,9 +75,8 @@ elif MODEL_NAME == 'draw':
     config['N'] = 12
 
     # instantiate model
-    x_shape = None #???????????
-    model = DRAW(config, x_shape).to(device)
+    model = DRAW(config, [2, 1]).to(device)
 
     # perform training
-    model_trainers.train_draw(train_loader, model, config)
+    model_trainers.train_draw(train_loader, val_loader, model, config)
 
