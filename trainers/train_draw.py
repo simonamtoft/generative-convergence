@@ -4,7 +4,8 @@ import torch
 from tqdm import tqdm
 from torch.optim import Adam, Adamax
 
-from .config import PROJECT_NAME, loss_func
+from .config import PROJECT_NAME
+from .train_utils import DeterministicWarmup
 
 
 def train_draw(train_loader, val_loader, model, config):
@@ -20,6 +21,10 @@ def train_draw(train_loader, val_loader, model, config):
     elif config['optimizer'] == 'adamax':
         optimizer = Adamax(model.parameters(), lr=config['lr'])
     
+    # linear deterministic warmup
+    gamma = DeterministicWarmup(n=50, t_max=1)
+
+    # train and validate
     print(f"\nTraining of DRAW model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
     print(json.dumps(config, sort_keys=False, indent=4))
@@ -29,6 +34,7 @@ def train_draw(train_loader, val_loader, model, config):
         loss_recon = []
         loss_kl = []
         loss_elbo = []
+        alpha = next(gamma)
         for x in iter(train_loader):
             batch_size = x.size(0)
 
@@ -38,10 +44,11 @@ def train_draw(train_loader, val_loader, model, config):
             x_hat = torch.sigmoid(x_hat)
 
             # compute losses
-            recon = torch.mean(loss_func(x_hat, x))
+            # recon = torch.mean(loss_func(x_hat, x))
+            recon = 0
             kl = torch.mean(kld)
-            # loss = recon + alpha * kl
-            loss = recon + kl
+            loss = recon + alpha * kl
+            # loss = recon + kl
 
             # Update gradients
             loss.backward()
@@ -76,10 +83,11 @@ def train_draw(train_loader, val_loader, model, config):
                 x_hat = torch.sigmoid(x_hat)
                 
                 # Compute losses
-                recon = torch.mean(loss_func(x_hat, x))
+                # recon = torch.mean(loss_func(x_hat, x))
+                recon = 0
                 kl = torch.mean(kld)
-                # loss = recon + alpha * kl
-                loss = recon + kl
+                loss = recon + alpha * kl
+                # loss = recon + kl
 
                 # save losses
                 loss_recon.append(recon.item())

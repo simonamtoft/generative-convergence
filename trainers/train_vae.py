@@ -5,7 +5,8 @@ from tqdm import tqdm
 from torch.autograd import Variable
 from torch.optim import Adam, Adamax
 
-from .config import PROJECT_NAME, loss_func
+from .config import PROJECT_NAME
+from .train_utils import DeterministicWarmup
 
 
 def train_vae(train_loader, val_loader, model, config):
@@ -21,6 +22,10 @@ def train_vae(train_loader, val_loader, model, config):
     elif config['optimizer']  == 'adamax':
         optimizer = Adamax(model.parameters(), lr=config['lr'])
     
+    # linear deterministic warmup
+    gamma = DeterministicWarmup(n=50, t_max=1)
+    
+    # train and validate
     print(f"\nTraining of VAE model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
     print(json.dumps(config, sort_keys=False, indent=4))
@@ -30,6 +35,7 @@ def train_vae(train_loader, val_loader, model, config):
         elbo_train = []
         kld_train = []
         recon_train = []
+        alpha = next(gamma)
         for x in iter(train_loader):
             batch_size = x.size(0)
 
@@ -39,10 +45,10 @@ def train_vae(train_loader, val_loader, model, config):
             x_hat, kld = model(x)
 
             # Compute losses
-            recon = torch.mean(loss_func(x_hat, x))
+            # recon = torch.mean(loss_func(x_hat, x))
+            recon = torch.mean(dist.log_prob(x_hat))
             kl = torch.mean(kld)
-            # loss = recon + alpha * kl
-            loss = recon + kl
+            loss = recon + alpha * kl
 
             # Update gradients
             loss.backward()
@@ -72,14 +78,15 @@ def train_vae(train_loader, val_loader, model, config):
 
                 # Pass batch through model
                 x = x.view(batch_size, -1)
+                print(x.shape)
                 x = Variable(x).to(config['device'])
                 x_hat, kld = model(x)
 
                 # Compute losses
-                recon = torch.mean(loss_func(x_hat, x))
+                # recon = torch.mean(loss_func(x_hat, x))
+                recon = torch.mean(dist.log_prob(x_hat))
                 kl = torch.mean(kld)
-                # loss = recon + alpha * kl
-                loss = recon + kl
+                loss = recon + alpha * kl
 
                 # save losses
                 elbo_val.append(torch.mean(-loss).item())
