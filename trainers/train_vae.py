@@ -4,6 +4,7 @@ import torch
 from tqdm import tqdm
 from torch.autograd import Variable
 from torch.optim import Adam, Adamax
+from torch.distributions.normal import Normal
 
 from .config import PROJECT_NAME
 from .train_utils import DeterministicWarmup
@@ -24,6 +25,9 @@ def train_vae(train_loader, val_loader, model, config):
     
     # linear deterministic warmup
     gamma = DeterministicWarmup(n=50, t_max=1)
+
+    # define 
+    p = Normal(torch.tensor([0.0]), torch.tensor([1.0]))
     
     # train and validate
     print(f"\nTraining of VAE model will run on device: {config['device']}")
@@ -45,8 +49,8 @@ def train_vae(train_loader, val_loader, model, config):
             x_hat, kld = model(x)
 
             # Compute losses
-            # recon = torch.mean(loss_func(x_hat, x))
-            recon = torch.mean(dist.log_prob(x_hat))
+            zp = p.log_prob(p.rsample(x.size())).sum(1)
+            recon = torch.mean(zp)
             kl = torch.mean(kld)
             loss = recon + alpha * kl
 
@@ -78,13 +82,12 @@ def train_vae(train_loader, val_loader, model, config):
 
                 # Pass batch through model
                 x = x.view(batch_size, -1)
-                print(x.shape)
                 x = Variable(x).to(config['device'])
                 x_hat, kld = model(x)
 
                 # Compute losses
-                # recon = torch.mean(loss_func(x_hat, x))
-                recon = torch.mean(dist.log_prob(x_hat))
+                zp = p.log_prob(p.rsample(x.size())).sum(1)
+                recon = torch.mean(zp)
                 kl = torch.mean(kld)
                 loss = recon + alpha * kl
 

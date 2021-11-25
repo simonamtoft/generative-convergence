@@ -143,9 +143,7 @@ class VariationalAutoencoder(nn.Module):
 
 
     def _kld(self, z, q_param, p_param=None):
-        """
-            Compute KL-divergence of some element z.
-        
+        """Compute KL-divergence of some element z.    
         Inputs:
             z           : sample from the q distribution
             q_param     : (mu, log_var) of the q distribution.
@@ -176,6 +174,7 @@ class VariationalAutoencoder(nn.Module):
             x       :   input data
         Returns
             x_mu    :   reconstructed input
+            kld     :   computed kl-divergence
         """
         # fit q(z|x) to x
         z, z_mu, z_log_var = self.encoder(x)
