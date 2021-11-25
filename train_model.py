@@ -2,15 +2,14 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from lib.gen_data import get_ffjord_data
-import model_trainers
+from lib import get_ffjord_data
 
-from draw.draw import DRAW
-from vae.vae import VariationalAutoencoder
+from models import DRAW, VariationalAutoencoder
+from trainers import train_vae, train_draw, train_flow
 
 # pick model to train
 # - vae, draw, flow
-MODEL_NAME = 'draw' 
+MODEL_NAME = 'vae'
 
 # set device
 has_cuda = torch.cuda.is_available()
@@ -62,10 +61,13 @@ if MODEL_NAME == 'vae':
     model = VariationalAutoencoder(config, 2).to(device)
 
     # perform training
-    model_trainers.train_vae(train_loader, val_loader, model, config)
+    train_vae(train_loader, val_loader, model, config)
 elif MODEL_NAME == 'flow':
+    # instantiate model
     model = None
-    model_trainers.train_flow(train_loader, val_loader, model, config)
+
+    # perform training
+    train_flow(train_loader, val_loader, model, config)
 elif MODEL_NAME == 'draw':
     # define some model specific config
     config['attention'] = 'base'
@@ -78,5 +80,5 @@ elif MODEL_NAME == 'draw':
     model = DRAW(config, [1, 2]).to(device)
 
     # perform training
-    model_trainers.train_draw(train_loader, val_loader, model, config)
+    train_draw(train_loader, val_loader, model, config)
 

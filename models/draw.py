@@ -61,7 +61,7 @@ class DRAW(nn.Module):
             # use attention to read image: N x N
             r_t = self.attention.read(x, x_hat, h_dec)
 
-            # pass throuygh encoder
+            # pass through encoder
             h_enc, c_enc = self.encoder(
                 torch.cat([r_t, h_dec], dim=1),
                 [h_enc, c_enc]
