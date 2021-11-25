@@ -12,10 +12,10 @@ from trainers import train_vae, train_draw, train_flow
 # Define config
 CONFIG = {
     'dataset': '8gaussians',
-    'train_samples': 1024,
-    'val_samples': 1024,
+    'train_samples': 8192,
+    'val_samples': 8192,
     'batch_size': 64,
-    'epochs': 10,
+    'epochs': 250,
     'lr': 1e-3,
     'optimizer': 'adam',
 }
@@ -43,11 +43,11 @@ if __name__ == '__main__':
     config['model'] = args.model
     config['device'] = 'cpu'
 
-    # get data
+    # get train and validation data
     train_data = get_ffjord_data(config['dataset'], config['train_samples'])
     val_data = get_ffjord_data(config['dataset'], config['val_samples'])
 
-    # Setup data loader
+    # Setup data loaders
     # kwargs = {'num_workers': 4, 'pin_memory': True} if has_cuda else {}
     kwargs = {}
     train_loader = DataLoader(
@@ -62,7 +62,6 @@ if __name__ == '__main__':
         shuffle=False,
         **kwargs
     )
-
 
     # define and train model
     if config['model'] == 'vae':
