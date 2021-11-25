@@ -24,7 +24,14 @@ CONFIG = {
 if __name__ == '__main__':
     # get arguments
     parser = argparse.ArgumentParser(description="Model training script.")
-    parser.add_argument('-m', '--model', help='Pick which model to train (default: vae).', default='vae', type=str, choices=['vae', 'draw', 'flow'])
+    parser.add_argument(
+        '-m', 
+        help='Pick which model to train (default: vae).', 
+        default='vae',
+        type=str,
+        choices=['vae', 'draw', 'flow'],
+        dest='model'
+    )
     args = parser.parse_args()
 
     # set device
