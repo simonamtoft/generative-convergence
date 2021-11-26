@@ -2,19 +2,20 @@ import argparse
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-from lib import get_ffjord_data
+from lib import get_ffjord_data, get_toy_names
 
 from models import DRAW, VariationalAutoencoder
 from trainers import train_vae, train_draw, train_flow
 
 
-# Define config
 CONFIG = {
     'dataset': '8gaussians',
-    'train_samples': 8192,
-    'val_samples': 8192,
-    'batch_size': 64,
+    'train_samples': 16384,
+    'val_samples': 16384,
+    'batch_size': 1024,
     'epochs': 250,
     'lr': 1e-3,
     'optimizer': 'adam',
@@ -32,15 +33,24 @@ if __name__ == '__main__':
         choices=['vae', 'draw', 'flow'],
         dest='model'
     )
+    parser.add_argument(
+        '-d', 
+        help='Pick which dataset to fit to (default: 8gaussians).', 
+        default='8gaussians',
+        type=str,
+        choices=get_toy_names(),
+        dest='dataset'
+    )
     args = parser.parse_args()
 
     # set device
     # has_cuda = torch.cuda.is_available()
     # device = torch.device('cuda' if has_cuda else 'cpu')
 
-    # start config
+    # add arguments to config
     config = CONFIG
     config['model'] = args.model
+    config['dataset'] = args.dataset
     config['device'] = 'cpu'
 
     # get train and validation data
@@ -62,6 +72,9 @@ if __name__ == '__main__':
         shuffle=False,
         **kwargs
     )
+
+    # set seaborn
+    sns.set()
 
     # define and train model
     if config['model'] == 'vae':
@@ -94,4 +107,3 @@ if __name__ == '__main__':
 
         # perform training
         train_draw(train_loader, val_loader, model, config)
-
