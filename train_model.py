@@ -13,10 +13,10 @@ from trainers import train_vae, train_draw, train_flow
 
 CONFIG = {
     'dataset': '8gaussians',
-    'train_samples': 16384,
-    'val_samples': 16384,
-    'batch_size': 1024,
-    'epochs': 250,
+    'train_samples': 32768,
+    'val_samples': 32768,
+    'batch_size': 4096,
+    'epochs': 75,
     'lr': 1e-3,
     'optimizer': 'adam',
 }
@@ -44,21 +44,21 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # set device
-    # has_cuda = torch.cuda.is_available()
+    has_cuda = torch.cuda.is_available()
     # device = torch.device('cuda' if has_cuda else 'cpu')
-
+    
     # add arguments to config
     config = CONFIG
     config['model'] = args.model
     config['dataset'] = args.dataset
-    config['device'] = 'cpu'
+    config['device'] = 'cuda' if has_cuda else 'cpu'
 
     # get train and validation data
     train_data = get_ffjord_data(config['dataset'], config['train_samples'])
     val_data = get_ffjord_data(config['dataset'], config['val_samples'])
 
     # Setup data loaders
-    # kwargs = {'num_workers': 4, 'pin_memory': True} if has_cuda else {}
+    kwargs = {'num_workers': 1, 'pin_memory': True} if has_cuda else {} # 4
     kwargs = {}
     train_loader = DataLoader(
         train_data,
