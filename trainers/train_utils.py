@@ -24,6 +24,11 @@ def log_images(x_recon: torch.Tensor, x_sample: torch.Tensor, epoch: int) -> Non
     """Log reconstruction and sample to wandb"""
     name = f'./log_images/img_{epoch}.png'
 
+    # ensure both tensors are on cpu
+    if x_recon.is_cuda or x_sample.is_cuda:
+        x_recon = x_recon.detach().cpu()
+        x_sample = x_sample.detach().cpu()
+
     # create plots
     f, ax = plt.subplots(1, 2, figsize=(16, 6))
     ax[0].plot(x_recon[:, 0], x_recon[:, 1], '.')
