@@ -10,6 +10,13 @@ from .config import PROJECT_NAME
 from .train_utils import DeterministicWarmup, log_images
 
 
+def get_normal(x_params: torch.Tensor) -> Normal:
+    x_mu = x_params[:, 0:2]
+    x_log_var = x_params[:, 2:]
+    p = Normal(x_mu, x_log_var)
+    return p
+
+
 def train_vae(train_loader, val_loader, model, config):
     """ Train a Standard VAE model and log training information to wandb.
         Also perform an evaluation on a validation set."""
@@ -24,15 +31,12 @@ def train_vae(train_loader, val_loader, model, config):
         optimizer = Adamax(model.parameters(), lr=config['lr'])
     
     # linear deterministic warmup
-    gamma = DeterministicWarmup(n=50, t_max=1)
+    gamma = DeterministicWarmup(n=100, t_max=1)
 
-    # define 
-    p = Normal(torch.tensor([0.0]), torch.tensor([1.0]))
-    
     # train and validate
     print(f"\nTraining of VAE model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
-    print(json.dumps(config, sort_keys=False, indent=4))
+    print(json.dumps(config, sort_keys=False, indent=4) + '\n')
     for epoch in tqdm(range(config['epochs']), desc='Training VAE'):
         # Training epoch
         model.train()
@@ -46,10 +50,13 @@ def train_vae(train_loader, val_loader, model, config):
             # Pass batch through model
             x = x.view(batch_size, -1)
             x = Variable(x).to(config['device'])
-            x_hat, kld = model(x)
+            x_params, kld = model(x)
+
+            # define likelihood distribution
+            p = get_normal(x_params)
 
             # Compute losses
-            recon = torch.mean(-p.log_prob(x_hat).sum(1))
+            recon = -torch.mean(p.log_prob(x).sum(1))
             kl = torch.mean(kld)
             loss = recon + alpha * kl
 
@@ -62,7 +69,9 @@ def train_vae(train_loader, val_loader, model, config):
             elbo_train.append(torch.mean(-loss).item())
             kld_train.append(torch.mean(kl).item())
             recon_train.append(torch.mean(recon).item())
-    
+
+        x_recon = p.sample((1,))[0]
+
         # Log train stuff
         wandb.log({
             'recon_train': torch.tensor(recon_train).mean(),
@@ -82,10 +91,13 @@ def train_vae(train_loader, val_loader, model, config):
                 # Pass batch through model
                 x = x.view(batch_size, -1)
                 x = Variable(x).to(config['device'])
-                x_hat, kld = model(x)
+                x_params, kld = model(x)
+
+                # define likelihood distribution
+                p = get_normal(x_params)
 
                 # Compute losses
-                recon = torch.mean(-p.log_prob(x_hat).sum(1))
+                recon = -torch.mean(p.log_prob(x).sum(1))
                 kl = torch.mean(kld)
                 loss = recon + alpha * kl
 
@@ -101,15 +113,17 @@ def train_vae(train_loader, val_loader, model, config):
                 'elbo_val': torch.tensor(elbo_val).mean()
             }, commit=False)
 
-            # sample from model
+            # Sample from model
             if isinstance(config['z_dim'], list):
                 x_mu = Variable(torch.randn(config['batch_size'], config['z_dim'][0])).to(config['device'])
             else:
                 x_mu = Variable(torch.randn(config['batch_size'], config['z_dim'])).to(config['device'])
-            x_sample = model.sample(x_mu).detach()
+            x_params = model.sample(x_mu)
+            p = get_normal(x_params)
+            x_sample = p.sample((1,))[0]
             
             # log sample and reconstruction
-            log_images(x_hat, x_sample, epoch)
+            log_images(x_recon, x_sample, epoch+1)
 
     # Save final model
     torch.save(model, './saved_models/vae_model.pt')

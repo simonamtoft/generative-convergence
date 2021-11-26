@@ -122,13 +122,18 @@ class VariationalAutoencoder(nn.Module):
         # setup network dimensions
         h_dim = config['h_dim']
         z_dim = config['z_dim']
-        dims = [x_dim, h_dim, z_dim]
+        
+        if isinstance(x_dim, list):
+            enc_dims = [x_dim[0], h_dim, z_dim]
+            dec_dim = [z_dim, list(reversed(h_dim)), x_dim[1]]
+        else:
+            enc_dims = [x_dim, h_dim, z_dim]
+            dec_dim = [z_dim, list(reversed(h_dim)), x_dim]
 
         # Define encoder 
-        self.encoder = Encoder(dims)
+        self.encoder = Encoder(enc_dims)
         
         # Define decoder
-        dec_dim = [z_dim, list(reversed(h_dim)), x_dim]
         if config['as_beta']:
             self.decoder = BetaDecoder(dec_dim)
         else: 

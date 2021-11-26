@@ -16,7 +16,6 @@ CONFIG = {
     'train_samples': 32768,
     'val_samples': 32768,
     'batch_size': 4096,
-    'epochs': 75,
     'lr': 1e-3,
     'optimizer': 'adam',
 }
@@ -41,17 +40,24 @@ if __name__ == '__main__':
         choices=get_toy_names(),
         dest='dataset'
     )
+    parser.add_argument(
+        '-e', 
+        help='Pick number of epochs to train over (default: 100).', 
+        default=100,
+        type=int,
+        dest='epochs'
+    )
     args = parser.parse_args()
 
-    # set device
+    # check if cuda
     has_cuda = torch.cuda.is_available()
-    # device = torch.device('cuda' if has_cuda else 'cpu')
     
     # add arguments to config
     config = CONFIG
     config['model'] = args.model
     config['dataset'] = args.dataset
     config['device'] = 'cuda' if has_cuda else 'cpu'
+    config['epochs'] = args.epochs
 
     # get train and validation data
     train_data = get_ffjord_data(config['dataset'], config['train_samples'])
@@ -84,7 +90,7 @@ if __name__ == '__main__':
         config['as_beta'] = True
 
         # instantiate model
-        model = VariationalAutoencoder(config, 2).to(config['device'])
+        model = VariationalAutoencoder(config, [2, 4]).to(config['device'])
 
         # perform training
         train_vae(train_loader, val_loader, model, config)
