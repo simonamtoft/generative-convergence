@@ -7,7 +7,7 @@ from torch.optim import Adam, Adamax
 from torch.distributions.normal import Normal
 
 from .config import PROJECT_NAME
-from .train_utils import DeterministicWarmup
+from .train_utils import DeterministicWarmup, log_images
 
 
 def train_vae(train_loader, val_loader, model, config):
@@ -33,7 +33,7 @@ def train_vae(train_loader, val_loader, model, config):
     print(f"\nTraining of VAE model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
     print(json.dumps(config, sort_keys=False, indent=4))
-    for _ in tqdm(range(config['epochs']), desc='Training VAE'):
+    for epoch in tqdm(range(config['epochs']), desc='Training VAE'):
         # Training epoch
         model.train()
         elbo_train = []
@@ -49,8 +49,7 @@ def train_vae(train_loader, val_loader, model, config):
             x_hat, kld = model(x)
 
             # Compute losses
-            zp = p.log_prob(p.rsample(x.size())).sum(1)
-            recon = torch.mean(zp)
+            recon = torch.mean(-p.log_prob(x_hat).sum(1))
             kl = torch.mean(kld)
             loss = recon + alpha * kl
 
@@ -86,8 +85,7 @@ def train_vae(train_loader, val_loader, model, config):
                 x_hat, kld = model(x)
 
                 # Compute losses
-                zp = p.log_prob(p.rsample(x.size())).sum(1)
-                recon = torch.mean(zp)
+                recon = torch.mean(-p.log_prob(x_hat).sum(1))
                 kl = torch.mean(kld)
                 loss = recon + alpha * kl
 
@@ -101,7 +99,17 @@ def train_vae(train_loader, val_loader, model, config):
                 'recon_val': torch.tensor(recon_val).mean(),
                 'kl_val': torch.tensor(kld_val).mean(),
                 'elbo_val': torch.tensor(elbo_val).mean()
-            }, commit=True)
+            }, commit=False)
+
+            # sample from model
+            if isinstance(config['z_dim'], list):
+                x_mu = Variable(torch.randn(config['batch_size'], config['z_dim'][0])).to(config['device'])
+            else:
+                x_mu = Variable(torch.randn(config['batch_size'], config['z_dim'])).to(config['device'])
+            x_sample = model.sample(x_mu).detach()
+            
+            # log sample and reconstruction
+            log_images(x_hat, x_sample, epoch)
 
     # Save final model
     torch.save(model, './saved_models/vae_model.pt')
