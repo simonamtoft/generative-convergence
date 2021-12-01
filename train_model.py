@@ -7,7 +7,8 @@ import seaborn as sns
 
 from lib import get_ffjord_data, get_toy_names
 
-from models import DRAW, VariationalAutoencoder
+from models import DRAW, VariationalAutoencoder, Flow, \
+    AffineCouplingBijection, ActNormBijection, Reverse, ElementwiseParams, StandardNormal
 from trainers import train_vae, train_draw, train_flow
 
 
@@ -96,7 +97,22 @@ if __name__ == '__main__':
         train_vae(train_loader, val_loader, model, config)
     elif config['model']  == 'flow':
         # instantiate model
-        model = None
+        def net():
+            return nn.Sequential(
+                nn.Linear(1, 200), nn.ReLU(),
+                nn.Linear(200, 100), nn.ReLU(),
+                nn.Linear(100, 2), ElementwiseParams(2)
+            )
+
+        model = Flow(
+            base_dist=StandardNormal((2,)),
+            transforms=[
+                AffineCouplingBijection(net()), ActNormBijection(2), Reverse(2),
+                AffineCouplingBijection(net()), ActNormBijection(2), Reverse(2),
+                AffineCouplingBijection(net()), ActNormBijection(2), Reverse(2),
+                AffineCouplingBijection(net()), ActNormBijection(2),
+            ]
+        ).to(config['device'])
 
         # perform training
         train_flow(train_loader, val_loader, model, config)

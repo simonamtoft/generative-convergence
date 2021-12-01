@@ -3,9 +3,17 @@ import wandb
 import torch
 from tqdm import tqdm
 from torch.optim import Adam, Adamax
+from torch.distributions.normal import Normal
 
 from .config import PROJECT_NAME
 from .train_utils import DeterministicWarmup
+
+
+def get_normal(x_params: torch.Tensor) -> Normal:
+    x_mu = x_params[:, 0:2]
+    x_log_var = x_params[:, 2:]
+    p = Normal(x_mu, x_log_var)
+    return p
 
 
 def train_draw(train_loader, val_loader, model, config):
@@ -40,15 +48,16 @@ def train_draw(train_loader, val_loader, model, config):
 
             # Pass through model
             x = x.view(batch_size, -1).to(config['device'])
-            x_hat, kld = model(x)
-            x_hat = torch.sigmoid(x_hat)
+            x_params, kld = model(x)
+            # x_params = torch.sigmoid(x_params)
 
-            # compute losses
-            # recon = torch.mean(loss_func(x_hat, x))
-            recon = 0
+            # define likelihood distribution
+            p = get_normal(x_params)
+
+            # Compute losses
+            recon = -torch.mean(p.log_prob(x).sum(1))
             kl = torch.mean(kld)
             loss = recon + alpha * kl
-            # loss = recon + kl
 
             # Update gradients
             loss.backward()
@@ -79,15 +88,16 @@ def train_draw(train_loader, val_loader, model, config):
 
                 # Pass through model
                 x = x.view(batch_size, -1).to(config['device'])
-                x_hat, kld = model(x)
-                x_hat = torch.sigmoid(x_hat)
-                
+                x_params, kld = model(x)
+                # x_params = torch.sigmoid(x_params)
+
+                # define likelihood distribution
+                p = get_normal(x_params)
+
                 # Compute losses
-                # recon = torch.mean(loss_func(x_hat, x))
-                recon = 0
+                recon = -torch.mean(p.log_prob(x).sum(1))
                 kl = torch.mean(kld)
                 loss = recon + alpha * kl
-                # loss = recon + kl
 
                 # save losses
                 loss_recon.append(recon.item())
