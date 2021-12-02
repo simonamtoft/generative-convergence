@@ -115,10 +115,10 @@ def train_vae(train_loader, val_loader, model, config):
 
             # Sample from model
             if isinstance(config['z_dim'], list):
-                x_mu = Variable(torch.randn(config['batch_size'], config['z_dim'][0])).to(config['device'])
+                z_mu = Variable(torch.randn(config['batch_size'], config['z_dim'][0])).to(config['device'])
             else:
-                x_mu = Variable(torch.randn(config['batch_size'], config['z_dim'])).to(config['device'])
-            x_params = model.sample(x_mu)
+                z_mu = Variable(torch.randn(config['batch_size'], config['z_dim'])).to(config['device'])
+            x_params = model.sample(z_mu)
             p = get_normal(x_params)
             x_sample = p.sample((1,))[0]
             
