@@ -1,5 +1,6 @@
 ipykernel
 ipython
+ipywidgets
 numpy
 scikit-learn
 matplotlib

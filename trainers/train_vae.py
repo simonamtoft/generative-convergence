@@ -34,10 +34,10 @@ def train_vae(train_loader, val_loader, model, config):
     gamma = DeterministicWarmup(n=100, t_max=1)
 
     # train and validate
-    print(f"\nTraining of VAE model will run on device: {config['device']}")
+    print(f"\nTraining of {config['model']} model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
     print(json.dumps(config, sort_keys=False, indent=4) + '\n')
-    for epoch in tqdm(range(config['epochs']), desc='Training VAE'):
+    for epoch in tqdm(range(config['epochs']), desc=f"Training {config['model']}"):
         # Training epoch
         model.train()
         elbo_train = []
@@ -115,7 +115,7 @@ def train_vae(train_loader, val_loader, model, config):
 
             # Sample from model
             if isinstance(config['z_dim'], list):
-                z_mu = Variable(torch.randn(config['batch_size'], config['z_dim'][0])).to(config['device'])
+                z_mu = Variable(torch.randn(config['batch_size'], config['z_dim'][-1])).to(config['device'])
             else:
                 z_mu = Variable(torch.randn(config['batch_size'], config['z_dim'])).to(config['device'])
             x_params = model.sample(z_mu)
@@ -126,8 +126,8 @@ def train_vae(train_loader, val_loader, model, config):
             log_images(x_recon, x_sample, epoch+1)
 
     # Save final model
-    torch.save(model, './saved_models/vae_model.pt')
-    wandb.save('./saved_models/vae_model.pt')
+    torch.save(model, f"./saved_models/{config['model']}_model.pt")
+    wandb.save(f"./saved_models/{config['model']}_model.pt")
 
     # Finalize logging
     wandb.finish()
