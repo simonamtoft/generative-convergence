@@ -12,7 +12,7 @@ from .config import PROJECT_NAME
 
 
 def train_flow(train_loader, val_loader, model, config):
-    """ Train a FLOW model and log training information to wandb.
+    """ Train a Flow model and log training information to wandb.
         Also perform an evaluation on a validation set."""
     # Initialize a new wandb run
     wandb.init(project=PROJECT_NAME, config=config)
@@ -30,7 +30,7 @@ def train_flow(train_loader, val_loader, model, config):
     print(f"\nTraining of flow model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
     print(json.dumps(config, sort_keys=False, indent=4))
-    for epoch in tqdm(range(config['epochs']), desc='Training FLOW'):
+    for epoch in tqdm(range(config['epochs']), desc='Training Flow'):
         # Training Epoch
         model.train()
         losses = []
