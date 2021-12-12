@@ -1,9 +1,10 @@
+import os
 import argparse
+import matplotlib.pyplot as plt
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 from lib import get_ffjord_data, get_toy_names
 from models import DRAW, VariationalAutoencoder, LadderVAE, \
@@ -13,13 +14,20 @@ from trainers import train_vae, train_draw, train_flow
 
 
 CONFIG = {
-    'dataset': '8gaussians',
-    'train_samples': 64*1000,
-    'val_samples': 64*1000,
-    'batch_size': 2048,
-    'lr': 1e-3,
     'optimizer': 'adam',
+    'train_samples': 128*1000,
+    'val_samples': 128*1000,
+    'batch_size': 128,
+    'lr': 1e-3,
+    'lr_decay': {
+        'n_epochs': 4000,
+        'delay': 200,
+        'offset': 0,
+    },
+    'kl_warmup': 100,
 }
+
+DIRS = ['saved_models', 'log_images']
 
 
 if __name__ == '__main__':
@@ -48,7 +56,25 @@ if __name__ == '__main__':
         type=int,
         dest='epochs'
     )
+    parser.add_argument(
+        '-mute', 
+        help='Mute tqdm outputs. (mainly for bsub submit runs)', 
+        action='store_true'
+    )
+    parser.add_argument(
+        '-n',
+        help='Pick number of models to train.', 
+        default=1,
+        type=int,
+        dest='runs'
+    )
     args = parser.parse_args()
+
+    # create necessary folders
+    for directory in DIRS:
+        if not os.path.isdir(f'./{directory}'):
+            print(f'Creating directory "{directory}"...')
+            os.mkdir(f'./{directory}')
 
     # check if cuda
     has_cuda = torch.cuda.is_available()
@@ -79,25 +105,27 @@ if __name__ == '__main__':
         **kwargs
     )
 
-    # set seaborn
-    sns.set()
-
     # define and train model
     if 'vae' in config['model']:
         config['as_beta'] = True
+
+        # dimensions of data.
+        # input is (x, y) values (2) while 
+        # output of decoder should be 2 means and variances (4)
+        x_dim = [2, 4] 
 
         # load lvae or vae
         if config['model'] == 'lvae':
             config['h_dim'] = [512, 256, 256]
             config['z_dim'] = [64, 32, 32]
-            model = LadderVAE(config, [2, 4]).to(config['device'])
+            model = LadderVAE(config, x_dim).to(config['device'])
         else:
             config['h_dim'] = [512, 256, 128, 64]
             config['z_dim'] = 32
-            model = VariationalAutoencoder(config, [2, 4]).to(config['device'])
+            model = VariationalAutoencoder(config, x_dim).to(config['device'])
 
         # perform training
-        train_vae(train_loader, val_loader, model, config)
+        train_vae(train_loader, val_loader, model, config, args.mute)
     elif config['model']  == 'flow':
         # instantiate model
         def net():
@@ -118,7 +146,7 @@ if __name__ == '__main__':
         ).to(config['device'])
 
         # perform training
-        train_flow(train_loader, val_loader, model, config)
+        train_flow(train_loader, val_loader, model, config, args.mute)
     elif config['model']  == 'draw':
         # define some model specific config
         config['attention'] = 'base'
@@ -131,4 +159,4 @@ if __name__ == '__main__':
         model = DRAW(config, [1, 2]).to(config['device'])
 
         # perform training
-        train_draw(train_loader, val_loader, model, config)
+        train_draw(train_loader, val_loader, model, config, args.mute)

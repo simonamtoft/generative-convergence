@@ -1,36 +1,40 @@
 import os
 import json
 import wandb
-import torch
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+
+import torch
 from torch.optim import Adam, Adamax
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 from .config import PROJECT_NAME
+from .train_utils import DeterministicWarmup, log_images, \
+    lambda_lr
 
 
-def train_flow(train_loader, val_loader, model, config):
+def train_flow(train_loader, val_loader, model, config, mute):
     """ Train a Flow model and log training information to wandb.
         Also perform an evaluation on a validation set."""
     # Initialize a new wandb run
     wandb.init(project=PROJECT_NAME, config=config)
     wandb.watch(model)
 
-    # set plotting style
-    sns.set()
-
     # specify optimizer
     if config['optimizer'] == 'adam':
         optimizer = Adam(model.parameters(), lr=config['lr'])
     elif config['optimizer'] == 'adamax':
         optimizer = Adamax(model.parameters(), lr=config['lr'])
+    
+    # Set learning rate scheduler
+    if "lr_decay" in config:
+        scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
+        )
 
     print(f"\nTraining of flow model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
     print(json.dumps(config, sort_keys=False, indent=4))
-    for epoch in tqdm(range(config['epochs']), desc='Training Flow'):
+    for epoch in tqdm(range(config['epochs']), desc='Training Flow', disable=mute):
         # Training Epoch
         model.train()
         losses = []
@@ -51,6 +55,10 @@ def train_flow(train_loader, val_loader, model, config):
         wandb.log({
             'loss_train': torch.tensor(losses).mean()
         }, commit=False)
+
+        # Update scheduler
+        if "lr_decay" in config:
+            scheduler.step()
 
         # Evaluate on validation set
         with torch.no_grad():

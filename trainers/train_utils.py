@@ -45,3 +45,14 @@ def log_images(x_recon: torch.Tensor, x_sample: torch.Tensor, epoch: int) -> Non
 
     # remove logged images
     os.remove(name)
+
+
+def lambda_lr(n_epochs, offset, delay):
+    """
+    Creates learning rate step function for LambdaLR scheduler.
+    Stepping starts after "delay" epochs and will reduce LR to 0 when "n_epochs" has been reached
+    Offset is used continuing training models.
+    """
+    if (n_epochs - delay) == 0:
+        raise Exception("Error: delay and n_epochs cannot be equal!")
+    return lambda epoch: 1 - max(0, epoch + offset - delay)/(n_epochs - delay)

@@ -7,7 +7,8 @@ from torch.optim import Adam, Adamax
 from torch.distributions.normal import Normal
 
 from .config import PROJECT_NAME
-from .train_utils import DeterministicWarmup, log_images
+from .train_utils import DeterministicWarmup, log_images, \
+    lambda_lr
 
 
 def get_normal(x_params: torch.Tensor) -> Normal:
@@ -17,7 +18,7 @@ def get_normal(x_params: torch.Tensor) -> Normal:
     return p
 
 
-def train_vae(train_loader, val_loader, model, config):
+def train_vae(train_loader, val_loader, model, config, mute):
     """ Train a Standard VAE model and log training information to wandb.
         Also perform an evaluation on a validation set."""
     # Initialize a new wandb run
@@ -31,13 +32,19 @@ def train_vae(train_loader, val_loader, model, config):
         optimizer = Adamax(model.parameters(), lr=config['lr'])
     
     # linear deterministic warmup
-    gamma = DeterministicWarmup(n=100, t_max=1)
+    gamma = DeterministicWarmup(n=config['kl_warmup'], t_max=1)
+
+    # Set learning rate scheduler
+    if "lr_decay" in config:
+        scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
+        )
 
     # train and validate
     print(f"\nTraining of {config['model']} model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
     print(json.dumps(config, sort_keys=False, indent=4) + '\n')
-    for epoch in tqdm(range(config['epochs']), desc=f"Training {config['model']}"):
+    for epoch in tqdm(range(config['epochs']), desc=f"Training {config['model']}", disable=mute):
         # Training epoch
         model.train()
         elbo_train = []
@@ -69,7 +76,8 @@ def train_vae(train_loader, val_loader, model, config):
             elbo_train.append(torch.mean(-loss).item())
             kld_train.append(torch.mean(kl).item())
             recon_train.append(torch.mean(recon).item())
-
+        
+        # get sample for reconstruction
         x_recon = p.sample((1,))[0]
 
         # Log train stuff
@@ -78,6 +86,10 @@ def train_vae(train_loader, val_loader, model, config):
             'kl_train': torch.tensor(kld_train).mean(),
             'elbo_train': torch.tensor(elbo_train).mean()
         }, commit=False)
+
+        # Update scheduler
+        if "lr_decay" in config:
+            scheduler.step()
 
         # Validation epoch
         with torch.no_grad():

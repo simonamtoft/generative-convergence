@@ -6,7 +6,8 @@ from torch.optim import Adam, Adamax
 from torch.distributions.normal import Normal
 
 from .config import PROJECT_NAME
-from .train_utils import DeterministicWarmup
+from .train_utils import DeterministicWarmup, log_images, \
+    lambda_lr
 
 
 def get_normal(x_params: torch.Tensor) -> Normal:
@@ -16,7 +17,7 @@ def get_normal(x_params: torch.Tensor) -> Normal:
     return p
 
 
-def train_draw(train_loader, val_loader, model, config):
+def train_draw(train_loader, val_loader, model, config, mute):
     """ Train a DRAW model and log training information to wandb.
         Also perform an evaluation on a validation set."""
     # Initialize a new wandb run
@@ -30,13 +31,19 @@ def train_draw(train_loader, val_loader, model, config):
         optimizer = Adamax(model.parameters(), lr=config['lr'])
     
     # linear deterministic warmup
-    gamma = DeterministicWarmup(n=50, t_max=1)
+    gamma = DeterministicWarmup(n=config['kl_warmup'], t_max=1)
+
+    # Set learning rate scheduler
+    if "lr_decay" in config:
+        scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
+        )
 
     # train and validate
     print(f"\nTraining of DRAW model will run on device: {config['device']}")
     print(f"\nStarting training with config:")
     print(json.dumps(config, sort_keys=False, indent=4))
-    for _ in tqdm(range(config['epochs']), desc='Training DRAW'):
+    for _ in tqdm(range(config['epochs']), desc='Training DRAW', disable=mute):
         # Training Epoch
         model.train()
         loss_recon = []
@@ -76,6 +83,9 @@ def train_draw(train_loader, val_loader, model, config):
             'elbo_train': torch.tensor(loss_elbo).mean()
         }, commit=False)
 
+        # Update scheduler
+        if "lr_decay" in config:
+            scheduler.step()
 
         # Evaluate on validation set
         with torch.no_grad():
