@@ -8,6 +8,3 @@ seaborn
 wandb
 tqdm
 Pillow
-torch 
-torchvision 
-torchaudio
