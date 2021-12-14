@@ -18,5 +18,10 @@
 module load cuda/11.1
 module load cudnn/v8.0.4.30-prod-cuda-11.1
 
+# run training
 source venv/bin/activate
-python train_model.py -m lvae -d 8gaussians -e 1000 -mute
+for MODEL in lvae vae flow; do
+    for DATASET in checkerboard 8gaussians; do
+        python train_model.py -m $MODEL -d $DATASET -e 2000 -mute -n 10
+    done
+done
