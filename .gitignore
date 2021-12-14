@@ -131,7 +131,7 @@ dmypy.json
 wandb/
 tester.ipynb
 saved_models/*
-
+log_images/*
 
 *.err
 *.out
