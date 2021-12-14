@@ -1,6 +1,7 @@
 import json
 import wandb
 import torch
+import numpy as np
 from tqdm import tqdm
 from torch.optim import Adam, Adamax
 from torch.distributions.normal import Normal
@@ -40,9 +41,8 @@ def train_draw(train_loader, val_loader, model, config, mute):
         )
 
     # train and validate
-    print(f"\nTraining of DRAW model will run on device: {config['device']}")
-    print(f"\nStarting training with config:")
-    print(json.dumps(config, sort_keys=False, indent=4))
+    train_losses = {'recon': [], 'kl': [], 'elbo': []}
+    val_losses = {'recon': [], 'kl': [], 'elbo': []}
     for _ in tqdm(range(config['epochs']), desc='Training DRAW', disable=mute):
         # Training Epoch
         model.train()
@@ -76,11 +76,19 @@ def train_draw(train_loader, val_loader, model, config, mute):
             loss_kl.append(kl.item())
             loss_elbo.append(-loss.item())
         
+        # get mean losses
+        recon_train = np.array(recon_train).mean()
+        kld_train = np.array(kld_train).mean()
+        elbo_train = np.array(elbo_train).mean()
+
         # Log train stuff
+        train_losses['recon'].append(recon_train)
+        train_losses['kl'].append(kld_train)
+        train_losses['elbo'].append(elbo_train)
         wandb.log({
-            'recon_train': torch.tensor(loss_recon).mean(),
-            'kl_train': torch.tensor(loss_kl).mean(),
-            'elbo_train': torch.tensor(loss_elbo).mean()
+            'recon_train': recon_train,
+            'kl_train': kld_train,
+            'elbo_train': elbo_train
         }, commit=False)
 
         # Update scheduler
@@ -114,17 +122,23 @@ def train_draw(train_loader, val_loader, model, config, mute):
                 loss_kl.append(kl.item())
                 loss_elbo.append(-loss.item())
             
-            # Log validation stuff
-            wandb.log({
-                'recon_val': torch.tensor(loss_recon).mean(),
-                'kl_val': torch.tensor(loss_kl).mean(),
-                'elbo_val': torch.tensor(loss_elbo).mean()
-            }, commit=True)
+            # get mean losses
+            recon_val = np.array(recon_val).mean()
+            kld_val = np.array(kld_val).mean()
+            elbo_val = np.array(elbo_val).mean()
 
-    # Save final model
+            # Log validation losses
+            val_losses['recon'].append(recon_val)
+            val_losses['kl'].append(kld_val)
+            val_losses['elbo'].append(elbo_val)
+            wandb.log({
+                'recon_train': recon_val,
+                'kl_train': kld_val,
+                'elbo_train': elbo_val
+            }, commit=False)
+
+    # Finalize training
     torch.save(model, './saved_models/draw_model.pt')
     wandb.save('./saved_models/draw_model.pt')
-
-    # Finalize logging
     wandb.finish()
-    print('\nTraining finished!')
+    return train_losses, val_losses

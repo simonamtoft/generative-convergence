@@ -1,18 +1,20 @@
 import os
 import json
 import wandb
+import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 import torch
 from torch.optim import Adam, Adamax
+from torch.utils.data import DataLoader
 
 from .config import PROJECT_NAME
 from .train_utils import DeterministicWarmup, log_images, \
     lambda_lr
 
 
-def train_flow(train_loader, val_loader, model, config, mute):
+def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool):
     """ Train a Flow model and log training information to wandb.
         Also perform an evaluation on a validation set."""
     # Initialize a new wandb run
@@ -31,9 +33,9 @@ def train_flow(train_loader, val_loader, model, config, mute):
             optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
         )
 
-    print(f"\nTraining of flow model will run on device: {config['device']}")
-    print(f"\nStarting training with config:")
-    print(json.dumps(config, sort_keys=False, indent=4))
+    # train and validate
+    train_losses = []
+    val_losses = []
     for epoch in tqdm(range(config['epochs']), desc='Training Flow', disable=mute):
         # Training Epoch
         model.train()
@@ -52,8 +54,10 @@ def train_flow(train_loader, val_loader, model, config, mute):
             losses.append(loss.item())
 
         # log training
+        loss = np.array(losses).mean()
+        train_losses.append(loss)
         wandb.log({
-            'loss_train': torch.tensor(losses).mean()
+            'loss_train': loss
         }, commit=False)
 
         # Update scheduler
@@ -71,10 +75,12 @@ def train_flow(train_loader, val_loader, model, config, mute):
 
                 # update losses
                 losses.append(loss.item())
-
+            
             # Log validation stuff
+            loss = np.array(losses).mean()
+            val_losses.append(loss)
             wandb.log({
-                'loss_val': torch.tensor(losses).mean(),
+                'loss_val': loss,
             }, commit=False)
 
         # Sampling
@@ -97,6 +103,6 @@ def train_flow(train_loader, val_loader, model, config, mute):
     # torch.save(model, './saved_models/flow_model.pt')
     # wandb.save('./saved_models/flow_model.pt')
 
-    # Finalize logging
+    # Finalize training
     wandb.finish()
-    print('\nTraining finished!')
+    return train_losses, val_losses

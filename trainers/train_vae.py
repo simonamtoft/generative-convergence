@@ -1,9 +1,12 @@
 import json
 import wandb
-import torch
+import numpy as np
 from tqdm import tqdm
+
+import torch
 from torch.autograd import Variable
 from torch.optim import Adam, Adamax
+from torch.utils.data import DataLoader
 from torch.distributions.normal import Normal
 
 from .config import PROJECT_NAME
@@ -18,7 +21,7 @@ def get_normal(x_params: torch.Tensor) -> Normal:
     return p
 
 
-def train_vae(train_loader, val_loader, model, config, mute):
+def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool) -> tuple:
     """ Train a Standard VAE model and log training information to wandb.
         Also perform an evaluation on a validation set."""
     # Initialize a new wandb run
@@ -41,9 +44,8 @@ def train_vae(train_loader, val_loader, model, config, mute):
         )
 
     # train and validate
-    print(f"\nTraining of {config['model']} model will run on device: {config['device']}")
-    print(f"\nStarting training with config:")
-    print(json.dumps(config, sort_keys=False, indent=4) + '\n')
+    train_losses = {'recon': [], 'kl': [], 'elbo': []}
+    val_losses = {'recon': [], 'kl': [], 'elbo': []}
     for epoch in tqdm(range(config['epochs']), desc=f"Training {config['model']}", disable=mute):
         # Training epoch
         model.train()
@@ -80,11 +82,19 @@ def train_vae(train_loader, val_loader, model, config, mute):
         # get sample for reconstruction
         x_recon = p.sample((1,))[0]
 
-        # Log train stuff
+        # get mean losses
+        recon_train = np.array(recon_train).mean()
+        kld_train = np.array(kld_train).mean()
+        elbo_train = np.array(elbo_train).mean()
+
+        # Log train losses
+        train_losses['recon'].append(recon_train)
+        train_losses['kl'].append(kld_train)
+        train_losses['elbo'].append(elbo_train)
         wandb.log({
-            'recon_train': torch.tensor(recon_train).mean(),
-            'kl_train': torch.tensor(kld_train).mean(),
-            'elbo_train': torch.tensor(elbo_train).mean()
+            'recon_train': recon_train,
+            'kl_train': kld_train,
+            'elbo_train': elbo_train
         }, commit=False)
 
         # Update scheduler
@@ -117,12 +127,20 @@ def train_vae(train_loader, val_loader, model, config, mute):
                 elbo_val.append(torch.mean(-loss).item())
                 kld_val.append(torch.mean(kld).item())
                 recon_val.append(torch.mean(recon).item())
-        
-            # Log validation stuff
+
+            # get mean losses
+            recon_val = np.array(recon_val).mean()
+            kld_val = np.array(kld_val).mean()
+            elbo_val = np.array(elbo_val).mean()
+
+            # Log validation losses
+            val_losses['recon'].append(recon_val)
+            val_losses['kl'].append(kld_val)
+            val_losses['elbo'].append(elbo_val)
             wandb.log({
-                'recon_val': torch.tensor(recon_val).mean(),
-                'kl_val': torch.tensor(kld_val).mean(),
-                'elbo_val': torch.tensor(elbo_val).mean()
+                'recon_train': recon_val,
+                'kl_train': kld_val,
+                'elbo_train': elbo_val
             }, commit=False)
 
             # Sample from model
@@ -137,10 +155,8 @@ def train_vae(train_loader, val_loader, model, config, mute):
             # log sample and reconstruction
             log_images(x_recon, x_sample, epoch+1)
 
-    # Save final model
+    # Finalize training
     torch.save(model, f"./saved_models/{config['model']}_model.pt")
     wandb.save(f"./saved_models/{config['model']}_model.pt")
-
-    # Finalize logging
     wandb.finish()
-    print('\nTraining finished!')
+    return train_losses, val_losses
