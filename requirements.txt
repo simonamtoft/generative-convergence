@@ -8,3 +8,4 @@ seaborn
 wandb
 tqdm
 Pillow
+torch==1.4.0
