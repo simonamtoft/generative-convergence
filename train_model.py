@@ -18,9 +18,9 @@ from trainers import train_vae, train_draw, train_flow
 
 CONFIG = {
     'optimizer': 'adam',
-    'train_samples': 128*1000,
-    'val_samples': 128*1000,
-    'batch_size': 128,
+    'train_samples': 4096*1000,
+    'val_samples': 4096*1000,
+    'batch_size': 4096,
     'lr': 1e-3,
     'lr_decay': {
         'n_epochs': 4000,
@@ -139,7 +139,8 @@ if __name__ == '__main__':
     # train using different seeds
     seeds = np.random.randint(0, 1e6, args['n_runs'])
     losses = {'train': [], 'val': []}
-    for i, seed in enumerate(seeds):
+    for i in range(args['n_runs']):
+        seed = seeds[i]
         print(f"\nTraining with seed {seed} ({i+1}/{args['n_runs']})")
         seed_everything(seed)
         train, val = setup_and_train(config, args['mute'])
