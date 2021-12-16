@@ -20,9 +20,17 @@ module load cudnn/v8.0.4.30-prod-cuda-11.1
 
 # run training
 source venv/bin/activate
-for MODEL in flow; do
+# for MODEL in flow lvae vae; do
+#     for DATASET in checkerboard 8gaussians; do
+#         echo Executing: python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 10
+#         python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 10
+#     done
+# done
+
+
+for MODEL in lvae vae; do
     for DATASET in checkerboard 8gaussians; do
-        echo Executing: python train_model.py -m $MODEL -d $DATASET -e 500 -mute -n 10
-        python train_model.py -m $MODEL -d $DATASET -e 500 -mute -n 10
+        echo Executing: python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 1
+        python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 1
     done
 done
