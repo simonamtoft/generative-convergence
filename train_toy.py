@@ -54,6 +54,7 @@ def setup_and_train(config: dict, mute: bool) -> tuple:
             model = VariationalAutoencoder(config, x_dim).to(config['device'])
 
         # perform training
+        print(json.dumps(config, sort_keys=False, indent=4) + '\n')
         train_losses, val_losses = train_vae(train_loader, val_loader, model, config, mute, WANDB_NAME)
     elif config['model']  == 'flow':
         # instantiate model
@@ -75,23 +76,25 @@ def setup_and_train(config: dict, mute: bool) -> tuple:
         ).to(config['device'])
 
         # perform training
+        print(json.dumps(config, sort_keys=False, indent=4) + '\n')
         train_losses, val_losses = train_flow(train_loader, val_loader, model, config, mute, WANDB_NAME)
-    elif config['model']  == 'draw':
-        # define some model specific config
-        config['attention'] = 'base'
-        config['h_dim'] = 256
-        config['z_dim'] = 32
-        config['T'] = 10
-        config['N'] = 12
+    # elif config['model']  == 'draw':
+    #     # define some model specific config
+    #     config['attention'] = 'base'
+    #     config['h_dim'] = 256
+    #     config['z_dim'] = 32
+    #     config['T'] = 10
+    #     config['N'] = 12
 
-        # instantiate model
-        model = DRAW(config, [1, 2]).to(config['device'])
+    #     # instantiate model
+    #     model = DRAW(config, [1, 2]).to(config['device'])
 
-        # perform training
-        train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
-    return train_losses, val_losses
-
-
+    #     # perform training
+    #     print(json.dumps(config, sort_keys=False, indent=4) + '\n')
+    #     train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
+    # return train_losses, val_losses
+        else:
+            print("Error: Training of {config['model']} model is not implemented!")
 
 if __name__ == '__main__':
     # add arguments to config
@@ -131,11 +134,6 @@ if __name__ == '__main__':
 
     # mute weight and biases prints
     os.environ["WANDB_SILENT"] = "true"
-    
-    # print some stuff
-    print(f"\nTraining of {config['model']} model will run on device: {config['device']}")
-    print(f"\nStarting training with config:")
-    print(json.dumps(config, sort_keys=False, indent=4) + '\n')
 
     # train using different seeds
     seeds = np.random.randint(0, 1e6, args['n_runs'])
