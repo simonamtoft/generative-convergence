@@ -18,13 +18,13 @@ from trainers import train_vae, train_draw, train_flow
 
 CONFIG = {
     'optimizer': 'adam',
-    'train_samples': 4096*1000,
-    'val_samples': 4096*1000,
-    'batch_size': 4096,
+    'train_samples': 512*1000,
+    'val_samples': 512*1000,
+    'batch_size': 2048,
     'lr': 1e-3,
     'lr_decay': {
-        'n_epochs': 4000,
-        'delay': 200,
+        'n_epochs': 1000,
+        'delay': 150,
         'offset': 0,
     },
     'kl_warmup': 100,
@@ -146,7 +146,6 @@ if __name__ == '__main__':
         train, val = setup_and_train(config, args['mute'])
         losses['train'].append(train)
         losses['val'].append(val)
-        print(train, val)
     print('\nFinished all training runs...')
 
     # save loss results to file
