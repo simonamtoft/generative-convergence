@@ -44,12 +44,12 @@ def setup_and_train(config: dict, mute: bool) -> tuple:
 
         # load lvae or vae
         if config['model'] == 'lvae':
-            config['h_dim'] = [512, 256, 256]
-            config['z_dim'] = [64, 32, 32]
+            config['h_dim'] = [128, 128, 128]
+            config['z_dim'] = [2, 2, 2]
             model = LadderVAE(config, x_dim).to(config['device'])
         else:
-            config['h_dim'] = [512, 256, 128, 64]
-            config['z_dim'] = 32
+            config['h_dim'] = [128, 128, 128]
+            config['z_dim'] = 2
             model = VariationalAutoencoder(config, x_dim).to(config['device'])
 
         # perform training

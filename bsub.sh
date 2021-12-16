@@ -1,9 +1,9 @@
 #!/bin/sh
 #BSUB -q gpua100
 #BSUB -J "GenConv"
-#BSUB -n 4
+#BSUB -n 8
 #BSUB -gpu "num=1:mode=exclusive_process"
-#BSUB -W 23:59
+#BSUB -W 13:00
 #BSUB -R "rusage[mem=8GB]"
 ##BSUB -B
 ### -- send notification at completion--
@@ -20,8 +20,9 @@ module load cudnn/v8.0.4.30-prod-cuda-11.1
 
 # run training
 source venv/bin/activate
-for MODEL in lvae vae flow; do
+for MODEL in flow; do
     for DATASET in checkerboard 8gaussians; do
-        python train_model.py -m $MODEL -d $DATASET -e 2000 -mute -n 10
+        echo Executing: python train_model.py -m $MODEL -d $DATASET -e 500 -mute -n 10
+        python train_model.py -m $MODEL -d $DATASET -e 500 -mute -n 10
     done
 done
