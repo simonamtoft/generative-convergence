@@ -6,7 +6,6 @@ from tqdm import tqdm
 from torch.optim import Adam, Adamax
 from torch.distributions.normal import Normal
 
-from .config import PROJECT_NAME
 from .train_utils import DeterministicWarmup, log_images, \
     lambda_lr
 
@@ -18,11 +17,11 @@ def get_normal(x_params: torch.Tensor) -> Normal:
     return p
 
 
-def train_draw(train_loader, val_loader, model, config, mute):
+def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
     """ Train a DRAW model and log training information to wandb.
         Also perform an evaluation on a validation set."""
     # Initialize a new wandb run
-    wandb.init(project=PROJECT_NAME, config=config)
+    wandb.init(project=wandb_name, config=config)
     wandb.watch(model)
 
     # specify optimizer

@@ -9,16 +9,15 @@ import torch
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
 
-from .config import PROJECT_NAME
 from .train_utils import DeterministicWarmup, log_images, \
     lambda_lr
 
 
-def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool):
+def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool, wandb_name: str):
     """ Train a Flow model and log training information to wandb.
         Also perform an evaluation on a validation set."""
     # Initialize a new wandb run
-    wandb.init(project=PROJECT_NAME, config=config)
+    wandb.init(project=wandb_name, config=config)
     wandb.watch(model)
 
     # specify optimizer

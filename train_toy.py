@@ -31,6 +31,7 @@ CONFIG = {
 }
 
 DIRS = ['saved_models', 'log_images', 'losses']
+WANDB_NAME = "generative-convergence-toy"
 
 
 def setup_and_train(config: dict, mute: bool) -> tuple:
@@ -53,7 +54,7 @@ def setup_and_train(config: dict, mute: bool) -> tuple:
             model = VariationalAutoencoder(config, x_dim).to(config['device'])
 
         # perform training
-        train_losses, val_losses = train_vae(train_loader, val_loader, model, config, mute)
+        train_losses, val_losses = train_vae(train_loader, val_loader, model, config, mute, WANDB_NAME)
     elif config['model']  == 'flow':
         # instantiate model
         def net():
@@ -74,7 +75,7 @@ def setup_and_train(config: dict, mute: bool) -> tuple:
         ).to(config['device'])
 
         # perform training
-        train_losses, val_losses = train_flow(train_loader, val_loader, model, config, mute)
+        train_losses, val_losses = train_flow(train_loader, val_loader, model, config, mute, WANDB_NAME)
     elif config['model']  == 'draw':
         # define some model specific config
         config['attention'] = 'base'
@@ -87,7 +88,7 @@ def setup_and_train(config: dict, mute: bool) -> tuple:
         model = DRAW(config, [1, 2]).to(config['device'])
 
         # perform training
-        train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute)
+        train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
     return train_losses, val_losses
 
 
