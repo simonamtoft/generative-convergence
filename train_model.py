@@ -149,7 +149,7 @@ if __name__ == '__main__':
     print('\nFinished all training runs...')
 
     # save loss results to file
-    filename = f'./losses/{config["model"]}_{config["dataset"]}.json'
+    filename = f'./losses/{config["model"]}_{config["dataset"]}_{args["n_runs"]}.json'
     print(f'Saving losses to file {filename}')
     with open(filename, 'w') as f:
         json.dump(losses, f)
