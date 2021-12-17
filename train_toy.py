@@ -18,9 +18,9 @@ from trainers import train_vae, train_draw, train_flow
 
 CONFIG = {
     'optimizer': 'adam',
-    'train_samples': 512*1000,
-    'val_samples': 512*1000,
-    'batch_size': 2048,
+    'train_samples': 2048*1000,
+    'val_samples': 2048*1000,
+    'batch_size': 4096,
     'lr': 1e-3,
     'lr_decay': {
         'n_epochs': 1000,
@@ -93,8 +93,7 @@ def setup_and_train(config: dict, mute: bool) -> tuple:
     #     print(json.dumps(config, sort_keys=False, indent=4) + '\n')
     #     train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
     # return train_losses, val_losses
-        else:
-            print("Error: Training of {config['model']} model is not implemented!")
+
 
 if __name__ == '__main__':
     # add arguments to config

@@ -29,7 +29,7 @@ source venv/bin/activate
 
 
 for MODEL in lvae vae; do
-    for DATASET in checkerboard 8gaussians; do
+    for DATASET in 8gaussians; do
         echo Executing: python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 1
         python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 1
     done
