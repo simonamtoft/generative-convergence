@@ -28,7 +28,7 @@ source venv/bin/activate
 # done
 
 
-for MODEL in lvae vae; do
+for MODEL in lvae; do
     for DATASET in 8gaussians; do
         echo Executing: python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 1
         python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 1
