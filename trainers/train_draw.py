@@ -6,7 +6,7 @@ from tqdm import tqdm
 from torch.optim import Adam, Adamax
 from torch.distributions.normal import Normal
 
-from .train_utils import DeterministicWarmup, log_images, \
+from lib import DeterministicWarmup, log_images, \
     lambda_lr
 
 
@@ -34,10 +34,10 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
     gamma = DeterministicWarmup(n=config['kl_warmup'], t_max=1)
 
     # Set learning rate scheduler
-    if "lr_decay" in config:
-        scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
-        )
+    # if "lr_decay" in config:
+    scheduler = torch.optim.lr_scheduler.LambdaLR(
+        optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
+    )
 
     # train and validate
     train_losses = {'recon': [], 'kl': [], 'elbo': []}
@@ -91,8 +91,8 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
         }, commit=False)
 
         # Update scheduler
-        if "lr_decay" in config:
-            scheduler.step()
+        # if "lr_decay" in config:
+        scheduler.step()
 
         # Evaluate on validation set
         with torch.no_grad():

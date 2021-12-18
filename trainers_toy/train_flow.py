@@ -9,7 +9,7 @@ import torch
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
 
-from .train_utils import DeterministicWarmup, log_images, \
+from lib import DeterministicWarmup, log_images, \
     lambda_lr
 
 

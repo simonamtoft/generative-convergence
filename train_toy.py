@@ -13,7 +13,7 @@ from lib import get_ffjord_data, get_toy_names, \
 from models import DRAW, VariationalAutoencoder, LadderVAE, \
     Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
     ElementwiseParams, StandardNormal
-from trainers import train_vae, train_draw, train_flow
+from trainers_toy import train_vae, train_flow
 
 
 CONFIG = {
@@ -78,21 +78,7 @@ def setup_and_train(config: dict, mute: bool) -> tuple:
         # perform training
         print(json.dumps(config, sort_keys=False, indent=4) + '\n')
         train_losses, val_losses = train_flow(train_loader, val_loader, model, config, mute, WANDB_NAME)
-    # elif config['model']  == 'draw':
-    #     # define some model specific config
-    #     config['attention'] = 'base'
-    #     config['h_dim'] = 256
-    #     config['z_dim'] = 32
-    #     config['T'] = 10
-    #     config['N'] = 12
-
-    #     # instantiate model
-    #     model = DRAW(config, [1, 2]).to(config['device'])
-
-    #     # perform training
-    #     print(json.dumps(config, sort_keys=False, indent=4) + '\n')
-    #     train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
-    # return train_losses, val_losses
+    return train_losses, val_losses
 
 
 if __name__ == '__main__':
