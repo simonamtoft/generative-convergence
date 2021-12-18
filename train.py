@@ -5,16 +5,18 @@ import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
+
 from torch.utils.data import DataLoader
+from torchvision.datasets import MNIST
+from torchvision.transforms import Compose, ToTensor, Lambda
+
 
 from lib import seed_everything, get_args
 
 
 CONFIG = {
     'optimizer': 'adam',
-    'train_samples': 2048*1000,
-    'val_samples': 2048*1000,
-    'batch_size': 4096,
+    'batch_size': 128,
     'lr': 1e-3,
     'lr_decay': {
         'n_epochs': 1000,
@@ -27,6 +29,10 @@ CONFIG = {
 DIRS = ['saved_models', 'log_images', 'losses']
 WANDB_NAME = "generative-convergence-mnist"
 
+
+# Define transformation
+def tmp_lambda(x):
+    return torch.bernoulli(x)
 
 
 if __name__ == '__main__':
@@ -48,18 +54,24 @@ if __name__ == '__main__':
         kwargs = {}
 
     # get train and validation data
-    train_data = get_ffjord_data(config['dataset'], config['train_samples'])
-    val_data = get_ffjord_data(config['dataset'], config['val_samples'])
+    data_transform = Compose([
+        ToTensor(),
+        Lambda(tmp_lambda)
+    ])
+    train_data = MNIST('./', download=True, transform=data_transform)
+
+    # split into training and validation sets
+    train_set, val_set = torch.utils.data.random_split(train_data, [50000, 10000])
 
     # Setup data loaders
     train_loader = DataLoader(
-        train_data,
+        train_set,
         batch_size=config['batch_size'],
         shuffle=True,
         **kwargs
     )
     val_loader = DataLoader(
-        val_data,
+        val_set,
         batch_size=config['batch_size'],
         shuffle=False,
         **kwargs
