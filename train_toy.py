@@ -1,6 +1,5 @@
 import os
 import json
-import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -10,7 +9,7 @@ from torch.utils.data import DataLoader
 
 from lib import get_ffjord_data, get_toy_names, \
     seed_everything, get_args
-from models import DRAW, VariationalAutoencoder, LadderVAE, \
+from models import VariationalAutoencoder, LadderVAE, \
     Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
     ElementwiseParams, StandardNormal
 from trainers_toy import train_vae, train_flow
