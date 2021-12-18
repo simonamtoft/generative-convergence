@@ -132,6 +132,7 @@ wandb/
 tester.ipynb
 saved_models/*
 log_images/*
+MNIST/*
 
 *.err
 *.out

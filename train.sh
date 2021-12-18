@@ -1,6 +1,6 @@
 #!/bin/sh
 #BSUB -q gpua100
-#BSUB -J "Toy"
+#BSUB -J "MNIST"
 #BSUB -n 8
 #BSUB -gpu "num=1:mode=exclusive_process"
 #BSUB -W 13:00
@@ -20,17 +20,8 @@ module load cudnn/v8.0.4.30-prod-cuda-11.1
 
 # run training
 source venv/bin/activate
-# for MODEL in flow lvae vae; do
-#     for DATASET in checkerboard 8gaussians; do
-#         echo Executing: python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 10
-#         python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 10
-#     done
-# done
 
-
-for MODEL in lvae; do
-    for DATASET in 8gaussians; do
-        echo Executing: python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 1
-        python train_toy.py -m $MODEL -d $DATASET -e 500 -mute -n 1
-    done
+for MODEL in draw lvae vae flow; do
+    echo Executing: python train.py -m $MODEL -e 500 -mute -n 10
+    python train.py -m $MODEL -e 500 -mute -n 10
 done

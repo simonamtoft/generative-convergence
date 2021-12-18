@@ -117,13 +117,13 @@ class VariationalAutoencoder(nn.Module):
                         [input_dim, [hidden_dims], latent_dim]
          
     """
-    def __init__(self, config, x_dim):
+    def __init__(self, config, x_dim, x_list=True):
         super(VariationalAutoencoder, self).__init__()
         # setup network dimensions
         h_dim = config['h_dim']
         z_dim = config['z_dim']
         
-        if isinstance(x_dim, list):
+        if (not x_list) and isinstance(x_dim, list):
             enc_dims = [x_dim[0], h_dim, z_dim]
             dec_dim = [z_dim, list(reversed(h_dim)), x_dim[1]]
         else:

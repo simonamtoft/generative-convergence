@@ -6,14 +6,24 @@ import torch
 from torch.autograd import Variable
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
+from torch.distributions.normal import Normal
 
-from lib import DeterministicWarmup, log_images, \
-    lambda_lr, bce_loss
-
-SAVE_NAME = 'vae_model.pt'
+from lib import DeterministicWarmup, log_images_toy, \
+    lambda_lr
 
 
-def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool, wandb_name: str):
+def get_normal(x_params: torch.Tensor) -> Normal:
+    x_mu = x_params[:, 0:2]
+    x_log_var = x_params[:, 2:]
+    p = Normal(x_mu, x_log_var)
+    return p
+
+
+def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool, wandb_name: str) -> tuple:
+    """ Train a Standard VAE model and log training information to wandb.
+        Also perform an evaluation on a validation set.
+        Trains on toy data using a Normal distribution as the likelihood function
+    """
     # Initialize a new wandb run
     wandb.init(project=wandb_name, config=config)
     wandb.watch(model)
@@ -23,36 +33,39 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
         optimizer = Adam(model.parameters(), lr=config['lr'], betas=(0.9, 0.999))
     elif config['optimizer']  == 'adamax':
         optimizer = Adamax(model.parameters(), lr=config['lr'], betas=(0.9, 0.999))
+    
+    # linear deterministic warmup
+    gamma = DeterministicWarmup(n=config['kl_warmup'], t_max=1)
 
     # Set learning rate scheduler
     # if "lr_decay" in config:
     scheduler = torch.optim.lr_scheduler.LambdaLR(
         optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
     )
-    
-    # linear deterministic warmup
-    gamma = DeterministicWarmup(n=config['kl_warmup'], t_max=1)
 
-    # Run training and validation
+    # train and validate
     train_losses = {'recon': [], 'kl': [], 'elbo': []}
     val_losses = {'recon': [], 'kl': [], 'elbo': []}
     for epoch in tqdm(range(config['epochs']), desc=f"Training {config['model']}", disable=mute):
-        # Train Epoch
+        # Training epoch
         model.train()
-        alpha = next(gamma)
         elbo_train = []
         kld_train = []
         recon_train = []
-        for x, _ in iter(train_loader):
+        alpha = next(gamma)
+        for x in iter(train_loader):
             batch_size = x.size(0)
 
             # Pass batch through model
             x = x.view(batch_size, -1)
             x = Variable(x).to(config['device'])
-            x_hat, kld = model(x)
+            x_params, kld = model(x)
+
+            # define likelihood distribution
+            p = get_normal(x_params)
 
             # Compute losses
-            recon = torch.mean(bce_loss(x_hat, x))
+            recon = -torch.mean(p.log_prob(x).sum(1))
             kl = torch.mean(kld)
             loss = recon + alpha * kl
 
@@ -65,12 +78,15 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
             elbo_train.append(torch.mean(-loss).item())
             kld_train.append(torch.mean(kl).item())
             recon_train.append(torch.mean(recon).item())
+        
+        # get sample for reconstruction
+        x_recon = p.sample((1,))[0]
 
         # get mean losses
         recon_train = np.array(recon_train).mean()
         kld_train = np.array(kld_train).mean()
         elbo_train = np.array(elbo_train).mean()
-        
+
         # Log train losses
         train_losses['recon'].append(recon_train)
         train_losses['kl'].append(kld_train)
@@ -86,21 +102,24 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
         scheduler.step()
 
         # Validation epoch
-        model.eval()
         with torch.no_grad():
+            model.eval()
             elbo_val = []
             kld_val = []
             recon_val = []
-            for x, _ in iter(val_loader):
+            for x in iter(val_loader):
                 batch_size = x.size(0)
 
                 # Pass batch through model
                 x = x.view(batch_size, -1)
                 x = Variable(x).to(config['device'])
-                x_hat, kld = model(x)
+                x_params, kld = model(x)
+
+                # define likelihood distribution
+                p = get_normal(x_params)
 
                 # Compute losses
-                recon = torch.mean(bce_loss(x_hat, x))
+                recon = -torch.mean(p.log_prob(x).sum(1))
                 kl = torch.mean(kld)
                 loss = recon + alpha * kl
 
@@ -108,32 +127,34 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
                 elbo_val.append(torch.mean(-loss).item())
                 kld_val.append(torch.mean(kld).item())
                 recon_val.append(torch.mean(recon).item())
-        
-        # get mean losses
-        recon_val = np.array(recon_val).mean()
-        kld_val = np.array(kld_val).mean()
-        elbo_val = np.array(elbo_val).mean()
 
-        # Log validation losses
-        val_losses['recon'].append(recon_val)
-        val_losses['kl'].append(kld_val)
-        val_losses['elbo'].append(elbo_val)
-        wandb.log({
-            'recon_val': recon_val,
-            'kl_val': kld_val,
-            'elbo_val': elbo_val
-        }, commit=False)
+            # get mean losses
+            recon_val = np.array(recon_val).mean()
+            kld_val = np.array(kld_val).mean()
+            elbo_val = np.array(elbo_val).mean()
 
-        # Sample from model
-        if isinstance(config['z_dim'], list):
-            x_mu = Variable(torch.randn(16, config['z_dim'][0])).to(config['device'])
-        else:
-            x_mu = Variable(torch.randn(16, config['z_dim'])).to(config['device'])
-        x_sample = model.sample(x_mu)
+            # Log validation losses
+            val_losses['recon'].append(recon_val)
+            val_losses['kl'].append(kld_val)
+            val_losses['elbo'].append(elbo_val)
+            wandb.log({
+                'recon_train': recon_val,
+                'kl_train': kld_val,
+                'elbo_train': elbo_val
+            }, commit=False)
 
-        # Log images to wandb
-        log_images(x_hat, x_sample, epoch)
-    
+            # Sample from model
+            if isinstance(config['z_dim'], list):
+                z_mu = Variable(torch.randn(config['batch_size'], config['z_dim'][-1])).to(config['device'])
+            else:
+                z_mu = Variable(torch.randn(config['batch_size'], config['z_dim'])).to(config['device'])
+            x_params = model.sample(z_mu)
+            p = get_normal(x_params)
+            x_sample = p.sample((1,))[0]
+            
+            # log sample and reconstruction
+            log_images_toy(x_recon, x_sample, epoch+1)
+
     # Finalize training
     torch.save(model, f"./saved_models/{config['model']}_model.pt")
     wandb.save(f"./saved_models/{config['model']}_model.pt")

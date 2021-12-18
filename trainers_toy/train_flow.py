@@ -37,7 +37,7 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
         # Training Epoch
         model.train()
         losses = []
-        for x, _ in iter(train_loader):
+        for x in iter(train_loader):
             # pass through model and get loss
             x = x.to(config['device'])
             loss = -model.log_prob(x).mean()
@@ -49,7 +49,7 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
 
             # update losses
             losses.append(loss.item())
-        
+
         # log training
         loss = np.array(losses).mean()
         train_losses.append(loss)
@@ -94,7 +94,12 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
             "sampling": wandb.Image(name)
         }, commit=True)
         os.remove(name)
-        
+
+    # Save final model 
+    # <<<< THIS HAS ISSUES WITH A TRANSFORM DEFINED >>>>
+    # torch.save(model, './saved_models/flow_model.pt')
+    # wandb.save('./saved_models/flow_model.pt')
+
     # Finalize training
     wandb.finish()
     return train_losses, val_losses
