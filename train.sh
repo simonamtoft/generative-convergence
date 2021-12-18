@@ -21,7 +21,7 @@ module load cudnn/v8.0.4.30-prod-cuda-11.1
 # run training
 source venv/bin/activate
 
-for MODEL in draw lvae vae flow; do
+for MODEL in draw lvae vae; do
     echo Executing: python train.py -m $MODEL -e 500 -mute -n 10
     python train.py -m $MODEL -e 500 -mute -n 10
 done

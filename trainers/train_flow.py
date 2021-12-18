@@ -5,6 +5,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 import torch
+from torch.autograd import Variable
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
 
@@ -39,7 +40,7 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
         losses = []
         for x, _ in iter(train_loader):
             # pass through model and get loss
-            x = x.to(config['device'])
+            x = Variable(x).to(config['device'])
             loss = -model.log_prob(x).mean()
 
             # update gradients
@@ -67,7 +68,7 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
             losses = []
             for x in iter(val_loader):
                 # pass through model and get loss
-                x = x.to(config['device'])
+                x = Variable(x).to(config['device'])
                 loss = -model.log_prob(x).mean()
 
                 # update losses

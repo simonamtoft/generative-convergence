@@ -36,7 +36,7 @@ DIRS = ['saved_models', 'log_images', 'losses']
 WANDB_NAME = "generative-convergence-mnist"
 
 
-def setup_and_train(config: dict, mute: bool, x_shape: list) -> tuple:
+def setup_and_train(config: dict, mute: bool, x_shape: list, train_loader: DataLoader, val_loader: DataLoader) -> tuple:
     if 'vae' in config['model']:
         config['as_beta'] = True
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
         seed = seeds[i]
         print(f"\nTraining with seed {seed} ({i+1}/{args['n_runs']})")
         seed_everything(seed)
-        train, val = setup_and_train(config, args['mute'], x_shape)
+        train, val = setup_and_train(config, args['mute'], x_shape, train_loader, val_loader)
         losses['train'].append(train)
         losses['val'].append(val)
     print('\nFinished all training runs...')
