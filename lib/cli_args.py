@@ -43,8 +43,9 @@ def get_args(data_names: list, config: dict) -> tuple:
 
     # add args to config
     config['model'] = args.model
-    config['dataset'] = args.dataset
     config['epochs'] = args.epochs
+    if 'dataset' in args:
+        config['dataset'] = args.dataset
 
     # leftover args
     args = {'n_runs': args.n_runs, 'mute': args.mute}

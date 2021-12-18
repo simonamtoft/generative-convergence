@@ -10,8 +10,12 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 from torchvision.transforms import Compose, ToTensor, Lambda
 
+from models import DRAW, VariationalAutoencoder, LadderVAE, \
+    Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
+    ElementwiseParams, StandardNormal
 
 from lib import seed_everything, get_args
+from trainers import train_draw, train_vae #, train_flow
 
 
 CONFIG = {
@@ -28,6 +32,39 @@ CONFIG = {
 
 DIRS = ['saved_models', 'log_images', 'losses']
 WANDB_NAME = "generative-convergence-mnist"
+
+
+def setup_and_train(config: dict, mute: bool, x_shape: list) -> tuple:
+    if 'vae' in config['model']:
+        config['as_beta'] = True
+
+        # load lvae or vae
+        if config['model'] == 'lvae':
+            config['h_dim'] = [128, 128, 128]
+            config['z_dim'] = [2, 2, 2]
+            model = LadderVAE(config, x_shape).to(config['device'])
+        else:
+            config['h_dim'] = [128, 128, 128]
+            config['z_dim'] = 2
+            model = VariationalAutoencoder(config, x_shape).to(config['device'])
+
+        # perform training
+        print(json.dumps(config, sort_keys=False, indent=4) + '\n')
+        train_losses, val_losses = train_vae(train_loader, val_loader, model, config, mute, WANDB_NAME)
+    if config['model'] == 'draw':
+        config['h_dim'] = 256
+        config['z_dim'] = 32
+        config['T'] = 10
+        config['N'] = 12
+        config['attention'] = 'base'
+
+        # Instantiate model
+        model = DRAW(config, x_shape).to(config['device'])
+
+        # perform training
+        print(json.dumps(config, sort_keys=False, indent=4) + '\n')
+        train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
+    return train_losses, val_losses
 
 
 # Define transformation
@@ -77,6 +114,11 @@ if __name__ == '__main__':
         **kwargs
     )
 
+    # get shape of input
+    data_iter = iter(train_loader)
+    images, labels = data_iter.next()
+    x_shape = images.shape[2:4]
+
     # mute weight and biases prints
     os.environ["WANDB_SILENT"] = "true"
 
@@ -87,7 +129,7 @@ if __name__ == '__main__':
         seed = seeds[i]
         print(f"\nTraining with seed {seed} ({i+1}/{args['n_runs']})")
         seed_everything(seed)
-        train, val = setup_and_train(config, args['mute'])
+        train, val = setup_and_train(config, args['mute'], x_shape)
         losses['train'].append(train)
         losses['val'].append(val)
     print('\nFinished all training runs...')
