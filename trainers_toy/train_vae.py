@@ -37,10 +37,10 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
     gamma = DeterministicWarmup(n=config['kl_warmup'], t_max=1)
 
     # Set learning rate scheduler
-    if "lr_decay" in config:
-        scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
-        )
+    # if "lr_decay" in config:
+    scheduler = torch.optim.lr_scheduler.LambdaLR(
+        optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
+    )
 
     # train and validate
     train_losses = {'recon': [], 'kl': [], 'elbo': []}
@@ -97,8 +97,8 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
         }, commit=False)
 
         # Update scheduler
-        if "lr_decay" in config:
-            scheduler.step()
+        # if "lr_decay" in config:
+        scheduler.step()
 
         # Validation epoch
         with torch.no_grad():

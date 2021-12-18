@@ -27,10 +27,10 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
         optimizer = Adamax(model.parameters(), lr=config['lr'])
     
     # Set learning rate scheduler
-    if "lr_decay" in config:
-        scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
-        )
+    # if "lr_decay" in config:
+    scheduler = torch.optim.lr_scheduler.LambdaLR(
+        optimizer, lr_lambda=lambda_lr(**config["lr_decay"])
+    )
 
     # train and validate
     train_losses = []
@@ -60,8 +60,8 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
         }, commit=False)
 
         # Update scheduler
-        if "lr_decay" in config:
-            scheduler.step()
+        # if "lr_decay" in config:
+        scheduler.step()
 
         # Evaluate on validation set
         with torch.no_grad():
