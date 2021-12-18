@@ -1,5 +1,4 @@
 import os
-import json
 import wandb
 import numpy as np
 from tqdm import tqdm
@@ -9,8 +8,7 @@ import torch
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
 
-from lib import DeterministicWarmup, log_images, \
-    lambda_lr
+from lib import lambda_lr
 
 
 def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool, wandb_name: str):

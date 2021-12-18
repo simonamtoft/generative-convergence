@@ -12,10 +12,12 @@ from torchvision.transforms import Compose, ToTensor, Lambda
 
 from models import DRAW, VariationalAutoencoder, LadderVAE, \
     Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
-    ElementwiseParams, StandardNormal
+    ElementwiseParams, StandardNormal, Squeeze2d, Augment, \
+    UniformDequantization, DenseNet, ElementwiseParams2d, \
+    StandardUniform, Slice, ActNormBijection2d, Conv1x1
 
 from lib import seed_everything, get_args
-from trainers import train_draw, train_vae #, train_flow
+from trainers import train_draw, train_vae, train_flow
 
 
 CONFIG = {
@@ -51,7 +53,7 @@ def setup_and_train(config: dict, mute: bool, x_shape: list) -> tuple:
         # perform training
         print(json.dumps(config, sort_keys=False, indent=4) + '\n')
         train_losses, val_losses = train_vae(train_loader, val_loader, model, config, mute, WANDB_NAME)
-    if config['model'] == 'draw':
+    elif config['model'] == 'draw':
         config['h_dim'] = 256
         config['z_dim'] = 32
         config['T'] = 10
@@ -64,6 +66,48 @@ def setup_and_train(config: dict, mute: bool, x_shape: list) -> tuple:
         # perform training
         print(json.dumps(config, sort_keys=False, indent=4) + '\n')
         train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
+    elif config['model'] == 'flow':
+        def net(channels):
+            return nn.Sequential(
+                DenseNet(
+                    in_channels=channels//2,
+                    out_channels=channels,
+                    num_blocks=1,
+                    mid_channels=64,
+                    depth=8,
+                    growth=16,
+                    dropout=0.0,
+                    gated_conv=True,
+                    zero_init=True
+                ),
+                ElementwiseParams2d(2)
+            )
+
+        model = Flow(
+            base_dist=StandardNormal((8, 7, 7)),
+            transforms=[
+                    UniformDequantization(num_bits=8),
+                    Augment(StandardUniform((1, 28, 28)), x_size=1),
+                    AffineCouplingBijection(net(2)), ActNormBijection2d(2), Conv1x1(2),
+                    AffineCouplingBijection(net(2)), ActNormBijection2d(2), Conv1x1(2),
+                    AffineCouplingBijection(net(2)), ActNormBijection2d(2), Conv1x1(2),
+                    AffineCouplingBijection(net(2)), ActNormBijection2d(2), Conv1x1(2),
+                    Squeeze2d(), Slice(StandardNormal((4, 14, 14)), num_keep=4),
+                    AffineCouplingBijection(net(4)), ActNormBijection2d(4), Conv1x1(4),
+                    AffineCouplingBijection(net(4)), ActNormBijection2d(4), Conv1x1(4),
+                    AffineCouplingBijection(net(4)), ActNormBijection2d(4), Conv1x1(4),
+                    AffineCouplingBijection(net(4)), ActNormBijection2d(4), Conv1x1(4),
+                    Squeeze2d(), Slice(StandardNormal((8, 7, 7)), num_keep=8),
+                    AffineCouplingBijection(net(8)), ActNormBijection2d(8), Conv1x1(8),
+                    AffineCouplingBijection(net(8)), ActNormBijection2d(8), Conv1x1(8),
+                    AffineCouplingBijection(net(8)), ActNormBijection2d(8), Conv1x1(8),
+                    AffineCouplingBijection(net(8)), ActNormBijection2d(8), Conv1x1(8),
+            ]
+        ).to(config['device'])
+
+        # perform training
+        print(json.dumps(config, sort_keys=False, indent=4) + '\n')
+        train_losses, val_losses = train_flow(train_loader, val_loader, model, config, mute, WANDB_NAME)
     return train_losses, val_losses
 
 
