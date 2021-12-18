@@ -11,14 +11,15 @@ def get_args(data_names: list, config: dict) -> tuple:
         choices=['lvae', 'vae', 'draw', 'flow'],
         dest='model'
     )
-    parser.add_argument(
-        '-d', 
-        help='Pick which dataset to fit to (default: 8gaussians).', 
-        default='8gaussians',
-        type=str,
-        choices=data_names,
-        dest='dataset'
-    )
+    if data_names:
+        parser.add_argument(
+            '-d', 
+            help='Pick which dataset to fit to (default: 8gaussians).', 
+            default='8gaussians',
+            type=str,
+            choices=data_names,
+            dest='dataset'
+        )
     parser.add_argument(
         '-e', 
         help='Pick number of epochs to train over (default: 100).', 
