@@ -1,4 +1,3 @@
-import json
 import wandb
 import numpy as np
 from tqdm import tqdm
@@ -9,7 +8,7 @@ from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
 from torch.distributions.normal import Normal
 
-from lib import DeterministicWarmup, log_images, \
+from lib import DeterministicWarmup, log_images_toy, \
     lambda_lr
 
 
@@ -22,16 +21,18 @@ def get_normal(x_params: torch.Tensor) -> Normal:
 
 def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool, wandb_name: str) -> tuple:
     """ Train a Standard VAE model and log training information to wandb.
-        Also perform an evaluation on a validation set."""
+        Also perform an evaluation on a validation set.
+        Trains on toy data using a Normal distribution as the likelihood function
+    """
     # Initialize a new wandb run
     wandb.init(project=wandb_name, config=config)
     wandb.watch(model)
 
     # specify optimizer
     if config['optimizer'] == 'adam':
-        optimizer = Adam(model.parameters(), lr=config['lr'])
+        optimizer = Adam(model.parameters(), lr=config['lr'], betas=(0.9, 0.999))
     elif config['optimizer']  == 'adamax':
-        optimizer = Adamax(model.parameters(), lr=config['lr'])
+        optimizer = Adamax(model.parameters(), lr=config['lr'], betas=(0.9, 0.999))
     
     # linear deterministic warmup
     gamma = DeterministicWarmup(n=config['kl_warmup'], t_max=1)
@@ -152,7 +153,7 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
             x_sample = p.sample((1,))[0]
             
             # log sample and reconstruction
-            log_images(x_recon, x_sample, epoch+1)
+            log_images_toy(x_recon, x_sample, epoch+1)
 
     # Finalize training
     torch.save(model, f"./saved_models/{config['model']}_model.pt")
