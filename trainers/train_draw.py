@@ -54,15 +54,12 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
 
             # Pass through model
             x = x.view(batch_size, -1).to(config['device'])
-            x_params, kld = model(x)
-            # x_params = torch.sigmoid(x_params)
-
-            # define likelihood distribution
-            p = get_normal(x_params)
+            x_hat, kld = model(x)
+            x_hat = torch.sigmoid(x_hat)
 
             # Compute losses
-            recon = -torch.mean(p.log_prob(x).sum(1))
-            kl = torch.mean(kld)
+            recon = torch.mean(bce_loss(x_hat, x).sum(1))
+            kl = torch.mean(kld.sum(1))
             loss = recon + alpha * kl
 
             # Update gradients
