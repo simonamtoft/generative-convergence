@@ -102,6 +102,19 @@ def log_images(x_recon, x_sample, epoch):
     os.remove(name_2)
 
 
+def log_image_flow(x_sample, epoch):
+    convert_img(x_sample, "sample", epoch)
+
+    # Log the images to wandb
+    name = f"sample{epoch}.png"
+    wandb.log({
+        "Sample": wandb.Image(name)
+    }, commit=True)
+
+    # Delete the logged images
+    os.remove(name)
+
+
 def convert_img(img, img_name, epoch):
     name_jpg = img_name + str(epoch) + '.jpg'
     name_png = img_name + str(epoch) + '.png'

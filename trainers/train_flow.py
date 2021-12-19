@@ -9,7 +9,7 @@ from torch.autograd import Variable
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
 
-from lib import lambda_lr
+from lib import lambda_lr, log_image_flow
 
 
 def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool, wandb_name: str):
@@ -66,7 +66,7 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
         with torch.no_grad():
             model.eval()
             losses = []
-            for x in iter(val_loader):
+            for x, _ in iter(val_loader):
                 # pass through model and get loss
                 x = Variable(x).to(config['device'])
                 loss = -model.log_prob(x).mean()
@@ -82,19 +82,8 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
             }, commit=False)
 
         # Sampling
-        samples = model.sample(config['batch_size']).cpu().numpy()
-
-        # create and log plot
-        name = f'./log_images/flow_sampling_{epoch+1}.png'
-        plt.figure()
-        plt.plot(samples[:, 0], samples[:, 1], '.')
-        plt.title('Samples')
-        plt.savefig(name, transparent=True, bbox_inches='tight')
-        plt.close()
-        wandb.log({
-            "sampling": wandb.Image(name)
-        }, commit=True)
-        os.remove(name)
+        x_sample = model.sample(config['batch_size']).cpu().numpy()
+        log_image_flow(x_sample, epoch)
         
     # Finalize training
     wandb.finish()
