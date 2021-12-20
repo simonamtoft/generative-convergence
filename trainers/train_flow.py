@@ -5,6 +5,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 import torch
+from torch.nn.utils import clip_grad_norm_
 from torch.autograd import Variable
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
@@ -14,7 +15,7 @@ from lib import lambda_lr, log_image_flow
 
 def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: dict, mute: bool, wandb_name: str):
     """ Train a Flow model and log training information to wandb.
-        Also perform an evaluation on a validation set."""
+        Also perform an evaluation on a validation set."""  
     # Initialize a new wandb run
     wandb.init(project=wandb_name, config=config)
     wandb.watch(model)
@@ -49,6 +50,9 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
                 loss.backward()
                 optimizer.step()
                 optimizer.zero_grad()
+
+                # perform clipping of model parameters
+                clip_grad_norm_(model.parameters(), max_norm=1)
 
             # update losses
             losses.append(loss.item())
