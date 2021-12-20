@@ -129,9 +129,9 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
             val_losses['kl'].append(loss_kl)
             val_losses['elbo'].append(loss_elbo)
             wandb.log({
-                'recon_train': loss_recon,
-                'kl_train': loss_kl,
-                'elbo_train': loss_elbo
+                'recon_val': loss_recon,
+                'kl_val': loss_kl,
+                'elbo_val': loss_elbo
             }, commit=False)
 
             # Sample from model
