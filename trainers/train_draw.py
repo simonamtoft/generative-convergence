@@ -129,16 +129,16 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
             val_losses['kl'].append(loss_kl)
             val_losses['elbo'].append(loss_elbo)
             wandb.log({
-                'recon_train': loss_recon,
-                'kl_train': loss_kl,
-                'elbo_train': loss_elbo
+                'recon_val': loss_recon,
+                'kl_val': loss_kl,
+                'elbo_val': loss_elbo
             }, commit=False)
 
             # Sample from model
             x_sample = model.sample()
 
             # Log images to wandb
-            log_images(x_hat, x_sample, epoch)
+            log_images(x_hat, x_sample, str(epoch) + 'draw')
 
     # Finalize training
     torch.save(model, './saved_models/draw_model.pt')
