@@ -130,7 +130,7 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
         x_sample = model.sample(x_mu)
 
         # Log images to wandb
-        log_images(x_hat, x_sample, epoch)
+        log_images(x_hat, x_sample, str(epoch) + config['model'])
     
     # Finalize training
     torch.save(model, f"./saved_models/{config['model']}_model.pt")
