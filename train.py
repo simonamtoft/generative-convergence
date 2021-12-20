@@ -36,19 +36,20 @@ DIRS = ['saved_models', 'log_images', 'losses']
 WANDB_NAME = "generative-convergence-mnist"
 
 
-def setup_and_train(config: dict, mute: bool, x_shape: list, train_loader: DataLoader, val_loader: DataLoader) -> tuple:
+def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader: DataLoader, val_loader: DataLoader) -> tuple:
     if 'vae' in config['model']:
         config['as_beta'] = True
+        x_dim = x_shape[0] * x_shape[1]
 
         # load lvae or vae
         if config['model'] == 'lvae':
             config['h_dim'] = [128, 128, 128]
             config['z_dim'] = [2, 2, 2]
-            model = LadderVAE(config, x_shape).to(config['device'])
+            model = LadderVAE(config, x_dim).to(config['device'])
         else:
             config['h_dim'] = [128, 128, 128]
             config['z_dim'] = 2
-            model = VariationalAutoencoder(config, x_shape).to(config['device'])
+            model = VariationalAutoencoder(config, x_dim).to(config['device'])
 
         # perform training
         print(json.dumps(config, sort_keys=False, indent=4) + '\n')
