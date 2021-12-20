@@ -44,8 +44,8 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
     )
 
     # train and validate
-    train_losses = {'recon': [], 'kl': [], 'elbo': []}
-    val_losses = {'recon': [], 'kl': [], 'elbo': []}
+    train_losses = []
+    val_losses = []
     for epoch in tqdm(range(config['epochs']), desc=f"Training {config['model']}", disable=mute):
         # Training epoch
         model.train()
@@ -69,10 +69,12 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
             kl = torch.mean(kld)
             loss = recon + alpha * kl
 
-            # Update gradients
-            loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
+            # filter nan losses
+            if not torch.isnan(loss):
+                # Update gradients
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
 
             # save losses
             elbo_train.append(torch.mean(-loss).item())
@@ -88,13 +90,11 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
         elbo_train = np.array(elbo_train).mean()
 
         # Log train losses
-        train_losses['recon'].append(recon_train)
-        train_losses['kl'].append(kld_train)
-        train_losses['elbo'].append(elbo_train)
+        train_losses.append(elbo_train)
         wandb.log({
             'recon_train': recon_train,
             'kl_train': kld_train,
-            'elbo_train': elbo_train
+            'loss_train': elbo_train
         }, commit=False)
 
         # Update scheduler
@@ -134,13 +134,11 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
             elbo_val = np.array(elbo_val).mean()
 
             # Log validation losses
-            val_losses['recon'].append(recon_val)
-            val_losses['kl'].append(kld_val)
-            val_losses['elbo'].append(elbo_val)
+            val_losses.append(elbo_val)
             wandb.log({
                 'recon_train': recon_val,
                 'kl_train': kld_val,
-                'elbo_train': elbo_val
+                'loss_train': elbo_val
             }, commit=False)
 
             # Sample from model

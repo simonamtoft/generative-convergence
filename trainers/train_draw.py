@@ -44,8 +44,8 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
     bce_loss = nn.BCELoss(reduction='none').to(config['device'])
 
     # train and validate
-    train_losses = {'recon': [], 'kl': [], 'elbo': []}
-    val_losses = {'recon': [], 'kl': [], 'elbo': []}
+    train_losses = []
+    val_losses = []
     for epoch in tqdm(range(config['epochs']), desc='Training DRAW', disable=mute):
         # Training Epoch
         model.train()
@@ -66,10 +66,12 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
             kl = torch.mean(kld.sum(1))
             loss = recon + alpha * kl
 
-            # Update gradients
-            loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
+            # filter nan losses
+            if not torch.isnan(loss):
+                # Update gradients
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
 
             # save losses
             loss_recon.append(recon.item())
@@ -82,13 +84,11 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
         loss_elbo = np.array(loss_elbo).mean()
 
         # Log train stuff
-        train_losses['recon'].append(loss_recon)
-        train_losses['kl'].append(loss_kl)
-        train_losses['elbo'].append(loss_elbo)
+        train_losses.append(loss_elbo)
         wandb.log({
             'recon_train': loss_recon,
             'kl_train': loss_kl,
-            'elbo_train': loss_elbo
+            'loss_train': loss_elbo
         }, commit=False)
 
         # Update scheduler
@@ -125,13 +125,11 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
             loss_elbo = np.array(loss_elbo).mean()
 
             # Log validation losses
-            val_losses['recon'].append(loss_recon)
-            val_losses['kl'].append(loss_kl)
-            val_losses['elbo'].append(loss_elbo)
+            val_losses.append(loss_elbo)
             wandb.log({
                 'recon_val': loss_recon,
                 'kl_val': loss_kl,
-                'elbo_val': loss_elbo
+                'loss_val': loss_elbo
             }, commit=False)
 
             # Sample from model

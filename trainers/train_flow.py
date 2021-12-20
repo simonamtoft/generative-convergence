@@ -42,11 +42,13 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
             # pass through model and get loss
             x = Variable(x).to(config['device'])
             loss = -model.log_prob(x).mean()
-
-            # update gradients
-            loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
+            
+            # filter nan losses
+            if not torch.isnan(loss):
+                # update gradients
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
 
             # update losses
             losses.append(loss.item())
@@ -58,10 +60,9 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
             'loss_train': loss
         }, commit=False)
 
-        # Update scheduler
-        # if "lr_decay" in config:
+        # update lr scheduler
         scheduler.step()
-
+        
         # Evaluate on validation set
         with torch.no_grad():
             model.eval()
@@ -82,8 +83,8 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
             }, commit=False)
 
         # Sampling
-        x_sample = model.sample(config['batch_size']).cpu().numpy()
-        log_image_flow(x_sample, epoch)
+        x_sample = model.sample(16).cpu().float()/255
+        log_image_flow(x_sample, str(epoch) + 'flow')
         
     # Finalize training
     wandb.finish()
