@@ -123,7 +123,7 @@ class VariationalAutoencoder(nn.Module):
         h_dim = config['h_dim']
         z_dim = config['z_dim']
         
-        if (not x_list) and isinstance(x_dim, list):
+        if isinstance(x_dim, list):
             enc_dims = [x_dim[0], h_dim, z_dim]
             dec_dim = [z_dim, list(reversed(h_dim)), x_dim[1]]
         else:
