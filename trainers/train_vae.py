@@ -6,6 +6,7 @@ import torch
 from torch.autograd import Variable
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
+from torch.nn.utils import clip_grad_norm_
 
 from lib import DeterministicWarmup, log_images, \
     lambda_lr, bce_loss

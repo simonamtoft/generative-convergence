@@ -5,6 +5,7 @@ import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
 from torch.optim import Adam, Adamax
+from torch.nn.utils import clip_grad_norm_
 from torch.distributions.normal import Normal
 
 from lib import DeterministicWarmup, log_images, \

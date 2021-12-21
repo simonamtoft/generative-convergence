@@ -6,6 +6,7 @@ import torch
 from torch.autograd import Variable
 from torch.optim import Adam, Adamax
 from torch.utils.data import DataLoader
+from torch.nn.utils import clip_grad_norm_
 from torch.distributions.normal import Normal
 
 from lib import DeterministicWarmup, log_images_toy, \
@@ -75,6 +76,9 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
                 loss.backward()
                 optimizer.step()
                 optimizer.zero_grad()
+
+                # perform clipping of model parameters
+                clip_grad_norm_(model.parameters(), max_norm=1)
 
             # save losses
             elbo_train.append(torch.mean(-loss).item())
