@@ -105,7 +105,7 @@ def log_images(x_recon, x_sample, epoch):
 def log_image_flow(x_sample, epoch):
     # Log the images to wandb
     name = f"sample{epoch}.jpg"
-    save_image(x_sample, fp=name, nrow=2)
+    save_image(x_sample, fp=name, nrow=8)
     wandb.log({
         "Sample": wandb.Image(name)
     }, commit=True)

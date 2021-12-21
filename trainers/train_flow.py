@@ -87,7 +87,7 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
             }, commit=False)
 
         # Sampling
-        x_sample = model.sample(16).cpu().float()/255
+        x_sample = model.sample(16).cpu().float()
         log_image_flow(x_sample, str(epoch) + 'flow')
         
     # Finalize training
