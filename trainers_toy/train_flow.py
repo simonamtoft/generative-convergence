@@ -84,7 +84,7 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
         samples = model.sample(config['batch_size']).cpu().numpy()
 
         # create and log plot
-        name = f'./log_images/flow_sampling_{epoch+1}.png'
+        name = f'./log_images/flow_{config["dataset"]}_sampling_{epoch+1}.png'
         plt.figure()
         plt.plot(samples[:, 0], samples[:, 1], '.')
         plt.title('Samples')
