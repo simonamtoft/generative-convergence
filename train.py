@@ -107,7 +107,7 @@ def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader:
         ).to(config['device'])
         
         # alter some training params
-        config['lr'] = 5e-4
+        config['lr'] = 1e-4
 
         # perform training
         print(json.dumps(config, sort_keys=False, indent=4) + '\n')
