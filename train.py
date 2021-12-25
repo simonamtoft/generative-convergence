@@ -43,12 +43,12 @@ def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader:
 
         # load lvae or vae
         if config['model'] == 'lvae':
-            config['h_dim'] = [128, 128, 128]
-            config['z_dim'] = [2, 2, 2]
+            config['h_dim'] = [512, 256, 256]
+            config['z_dim'] = [64, 32, 32]
             model = LadderVAE(config, x_dim).to(config['device'])
         else:
-            config['h_dim'] = [128, 128, 128]
-            config['z_dim'] = 2
+            config['h_dim'] = [512, 256, 128, 64]
+            config['z_dim'] = 64
             model = VariationalAutoencoder(config, x_dim).to(config['device'])
 
         # perform training
@@ -87,7 +87,7 @@ def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader:
         model = Flow(
             base_dist=StandardNormal((8, 7, 7)),
             transforms=[
-                    UniformDequantization(num_bits=8),
+                    UniformDequantization(num_bits=1),
                     Augment(StandardUniform((1, 28, 28)), x_size=1),
                     AffineCouplingBijection(net(2)), ActNormBijection2d(2), Conv1x1(2),
                     AffineCouplingBijection(net(2)), ActNormBijection2d(2), Conv1x1(2),
