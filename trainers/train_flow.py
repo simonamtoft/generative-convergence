@@ -86,10 +86,10 @@ def train_flow(train_loader: DataLoader, val_loader: DataLoader, model, config: 
                 'loss_val': loss,
             }, commit=False)
 
-        # Sampling
-        x_sample = model.sample(16).cpu().float()
-        log_image_flow(x_sample, str(epoch) + 'flow')
-        
+            # Sampling
+            x_sample = model.sample(16).cpu().float()
+            log_image_flow(x_sample, str(epoch) + 'flow')
+            
     # Finalize training
     wandb.finish()
     return train_losses, val_losses

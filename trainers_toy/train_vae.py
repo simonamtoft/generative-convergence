@@ -155,7 +155,7 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
             x_sample = p.sample((1,))[0]
             
             # log sample and reconstruction
-            log_images_toy(x_recon, x_sample, epoch+1)
+            log_images_toy(x_recon, x_sample, str(epoch+1) + config['model'])
 
     # Finalize training
     torch.save(model, f"./saved_models/{config['model']}_model.pt")
