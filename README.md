@@ -2,6 +2,9 @@
 
 Modern Generative Models have achieved impressive results in Computer Vision, Natural Language Processing, and Density Estimation. However such results rely on brittle models that achieve convergence through optimization tricks, heavy hyperparameter optimization, and domain knowledge. In this project, we aim to study and compare the robustness of Deep Latent Variable and Flow Models with a focus on the role of random initialization (seed) on the training dynamics.
 
+## Adapting Autoencoders to two-dimensional Toy Data
+
+In order to train autoencoders such as the standard variational autoencoder (VAE) or a hierarchical autoencoder such as the ladder variational autoencoder (LVAE), the training routine has to be adapted. The training of either of these two models optimize the evidence lower bound (ELBO), which consists of a reconstruction and a Kullback–Leibler divergence term. The difference in training on two-dimensional data instead of standard image data like MNIST is the way in which we use the reconstruction term. For binarized MNIST data, the reconstruction term is simply the binary cross-entropy loss between the original images and the reconstructed images achieved from a pass through of the model.
 
 
 ## Model Training
