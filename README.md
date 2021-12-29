@@ -2,9 +2,11 @@
 
 Modern Generative Models have achieved impressive results in Computer Vision, Natural Language Processing, and Density Estimation. However such results rely on brittle models that achieve convergence through optimization tricks, heavy hyperparameter optimization, and domain knowledge. In this project, we aim to study and compare the robustness of Deep Latent Variable and Flow Models with a focus on the role of random initialization (seed) on the training dynamics.
 
-## Adapting Autoencoders to two-dimensional Toy Data
+## Adapting Autoencoders to Two-dimensional Toy Data
 
-In order to train autoencoders such as the standard variational autoencoder (VAE) or a hierarchical autoencoder such as the ladder variational autoencoder (LVAE), the training routine has to be adapted. The training of either of these two models optimize the evidence lower bound (ELBO), which consists of a reconstruction and a Kullback–Leibler divergence term. The difference in training on two-dimensional data instead of standard image data like MNIST is the way in which we use the reconstruction term. For binarized MNIST data, the reconstruction term is simply the binary cross-entropy loss between the original images and the reconstructed images achieved from a pass through of the model.
+In order to train autoencoders such as the standard variational autoencoder (VAE) or a hierarchical autoencoder such as the ladder variational autoencoder (LVAE), the training approach has to be adapted. The training of either of these two models optimize the evidence lower bound (ELBO), which consists of a reconstruction and a Kullback–Leibler (KL) divergence term. The difference in training on two-dimensional data instead of standard image data like MNIST is the way in which we use the reconstruction term. For binarized MNIST data, the reconstruction term is simply the binary cross-entropy loss between the original images and the reconstructed images achieved from a pass through of the model. 
+
+A way to adapt the autoencoder models is to model each dimension of the data with a mean and variance, such that for two-dimensional data the size of the decoder output is 4. Then a likelihood distribution is created from this decoder output, from which we compute the log probability of the input two-dimensional data point to originate from such a distribution, which is then our reconstruction term.
 
 
 ## Model Training
@@ -24,7 +26,7 @@ python train.py -m <model_name> -e <n_epochs> -mute -n <n_seeds>
 
 Where
 
-- `model_name` picks the model architecture to train. Can be either of the implemented models: `vae`, `lvae`, `flow` or `draw`.
+- `model_name` picks the model architecture to train. Can be either of the implemented models: `vae`, `lvae`, `flow` or `draw` (Note: the DRAW model is not implemented for training on the toy data).
 - `dataset_name` picks the toy data to train on. Can be either of the datasets from FFJORD.
 - `n_epochs` decides the number of epochs to train over.
 - `-mute` mutes the output from tqdm, don't use flag if you want the output.
