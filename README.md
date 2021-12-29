@@ -2,11 +2,24 @@
 
 Modern Generative Models have achieved impressive results in Computer Vision, Natural Language Processing, and Density Estimation. However such results rely on brittle models that achieve convergence through optimization tricks, heavy hyperparameter optimization, and domain knowledge. In this project, we aim to study and compare the robustness of Deep Latent Variable and Flow Models with a focus on the role of random initialization (seed) on the training dynamics.
 
+
 ## Adapting Autoencoders to Two-dimensional Toy Data
 
 In order to train autoencoders such as the standard variational autoencoder (VAE) or a hierarchical autoencoder such as the ladder variational autoencoder (LVAE), the training approach has to be adapted. The training of either of these two models optimize the evidence lower bound (ELBO), which consists of a reconstruction and a Kullback–Leibler (KL) divergence term. The difference in training on two-dimensional data instead of standard image data like MNIST is the way in which we use the reconstruction term. For binarized MNIST data, the reconstruction term is simply the binary cross-entropy loss between the original images and the reconstructed images achieved from a pass through of the model. 
 
 A way to adapt the autoencoder models is to model each dimension of the data with a mean and variance, such that for two-dimensional data the size of the decoder output is 4. Then a likelihood distribution is created from this decoder output, from which we compute the log probability of the input two-dimensional data point to originate from such a distribution, which is then our reconstruction term.
+
+<img src="http://www.sciweavers.org/tex2img.php?eq=ax%20%2B%20b%20%3D%20c&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="ax + b = c" width="89" height="17" />
+
+
+## Convergence Metrics
+In order to compare convergence of different models, each model is trained a number of times (e.g. 10), from which metrics on the test losses for each epoch during training can be calculated. For each of these runs, a different random seed is used for all used procedures (see [seed_everything](https://github.com/simonamtoft/generative-convergence/blob/main/lib/random_seed.py)).
+
+### FFJORD Toy Data
+
+
+
+### Binarized MNIST 
 
 
 ## Model Training
