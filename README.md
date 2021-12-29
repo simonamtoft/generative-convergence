@@ -9,7 +9,7 @@ In order to train autoencoders such as the standard variational autoencoder (VAE
 
 A way to adapt the autoencoder models is to model each dimension of the data with a mean and variance, such that for two-dimensional data the size of the decoder output is 4. Then a likelihood distribution is created from this decoder output, from which we compute the log probability of the input two-dimensional data point to originate from such a distribution, which is then our reconstruction term.
 
-<img src="https://bit.ly/3sMayI3" align="center" border="0" alt="ax + b = c" width="71" height="14" />
+<img src="https://bit.ly/3quP1Rz" align="center" border="0" alt="ax + b = c" width="71" height="14" />
 
 
 ## Convergence Metrics
