@@ -7,7 +7,7 @@ The project is carried out by [Simon Amtoft Pedersen](https://github.com/simonam
 
 ## Adapting Autoencoders to Two-dimensional Toy Data
 
-In order to train autoencoders such as the standard variational autoencoder (VAE) or a hierarchical autoencoder such as the ladder variational autoencoder (LVAE), the training approach has to be adapted. These models have a generative part given by <img src="https://latex.codecogs.com/svg.image?%5Cbg_black%20p(z)%20=%20p(x%7Cz)%5Ccdot%20p(z)"/>, where we try to model the original distribution of the data with `p`, such that we can draw samples with
+In order to train autoencoders such as the standard variational autoencoder (VAE) or a hierarchical autoencoder such as the ladder variational autoencoder (LVAE), the training approach has to be adapted. These models have a generative part given by <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;p(z)&space;=&space;p(x|z)\cdot&space;p(z)" title="\bg_black p(z) = p(x|z)\cdot p(z)" />, where we try to model the original distribution of the data with `p`, such that we can draw samples with
 
 <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;z&space;\sim&space;p(z)" title="\bg_black z \sim p(z)" /> and <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;x&space;\sim&space;p(x|z)" title="\bg_black x \sim p(x|z)" />
 
