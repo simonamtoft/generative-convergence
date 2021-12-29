@@ -15,7 +15,7 @@ The training of either of these two models optimize the evidence lower bound (EL
 
 For binarized MNIST data, the reconstruction term is simply the binary cross-entropy loss between the original images and the reconstructed images achieved from a pass through of the model. 
 
-A way to adapt the autoencoder models is to model each dimension of the data with a mean and variance, such that for two-dimensional data the size of the decoder output is 4. Then a likelihood distribution is created from this decoder output, <img src="https://bit.ly/3pCjtKk" align="center" border="0" alt="ax + b = c" width="89" height="17" /> from which we compute the log probability of the input two-dimensional data point to originate from such a distribution, which is then our reconstruction term.
+A way to adapt the autoencoder models is to model each dimension of the data with a mean and variance, such that the decoder outputs these <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;[\mu_x,&space;\sigma_x]&space;\sim&space;x&space;" title="\bg_black [\mu_x, \sigma_x] \sim x " />. Then a likelihood distribution is created from this decoder output , <img src="https://bit.ly/3pCjtKk" align="center" border="0" alt="ax + b = c" width="89" height="17" /> from which we compute the log probability of the input two-dimensional data point to originate from such a distribution, which is then our reconstruction term (see [implementation](https://github.com/simonamtoft/generative-convergence/blob/main/trainers_toy/train_vae.py#L69)).
 
 
 
