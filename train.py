@@ -44,7 +44,7 @@ def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader:
         # load lvae or vae
         if config['model'] == 'lvae':
             config['h_dim'] = [512, 256, 256]
-            config['z_dim'] = [64, 32, 32]
+            config['z_dim'] = [64, 64, 64]
             model = LadderVAE(config, x_dim).to(config['device'])
         else:
             config['h_dim'] = [512, 256, 128, 64]
