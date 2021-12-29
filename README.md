@@ -11,7 +11,7 @@ A way to adapt the autoencoder models is to model each dimension of the data wit
 
 ![equation](http://www.sciweavers.org/tex2img.php?eq=ax%20%2B%20b%20%3D%20c&bc=Transparent&fc=Black&im=png&fs=12&ff=modern&edit=0)
 
-<img src="http://www.sciweavers.org/tex2img.php?eq=ax%20%2B%20b%20%3D%20c&bc=Transparent&fc=Black&im=png&fs=12&ff=modern&edit=0" align="center" border="0" alt="ax + b = c" width="78" height="15" />
+<img src="https://bit.ly/3z6y7MO" align="center" border="0" alt="ax + b = c" width="71" height="14" />
 
 
 ## Convergence Metrics
