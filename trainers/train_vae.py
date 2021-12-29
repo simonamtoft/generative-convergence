@@ -56,6 +56,7 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
             recon = torch.mean(bce_loss(x_hat, x))
             kl = torch.mean(kld)
             loss = recon + alpha * kl
+            elbo = -(recon + kl)
 
             # filter nan losses
             if not torch.isnan(loss):
@@ -65,7 +66,7 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
                 optimizer.zero_grad()
 
             # save losses
-            elbo_train.append(torch.mean(-loss).item())
+            elbo_train.append(torch.mean(elbo).item())
             kld_train.append(torch.mean(kl).item())
             recon_train.append(torch.mean(recon).item())
 
@@ -104,9 +105,10 @@ def train_vae(train_loader: DataLoader, val_loader: DataLoader, model, config: d
                 recon = torch.mean(bce_loss(x_hat, x))
                 kl = torch.mean(kld)
                 loss = recon + alpha * kl
+                elbo = -(recon + kl)
 
                 # save losses
-                elbo_val.append(torch.mean(-loss).item())
+                elbo_val.append(torch.mean(elbo).item())
                 kld_val.append(torch.mean(kld).item())
                 recon_val.append(torch.mean(recon).item())
         

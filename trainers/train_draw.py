@@ -66,6 +66,7 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
             recon = torch.mean(bce_loss(x_hat, x).sum(1))
             kl = torch.mean(kld.sum(1))
             loss = recon + alpha * kl
+            elbo = -(recon + kl)
 
             # filter nan losses
             if not torch.isnan(loss):
@@ -77,7 +78,7 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
             # save losses
             loss_recon.append(recon.item())
             loss_kl.append(kl.item())
-            loss_elbo.append(-loss.item())
+            loss_elbo.append(elbo.item())
         
         # get mean losses
         loss_recon = np.array(loss_recon).mean()
@@ -114,11 +115,12 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
                 recon = torch.mean(bce_loss(x_hat, x).sum(1))
                 kl = torch.mean(kld.sum(1))
                 loss = recon + alpha * kl
+                elbo = -(recon + kl)
 
                 # save losses
                 loss_recon.append(recon.item())
                 loss_kl.append(kl.item())
-                loss_elbo.append(-loss.item())
+                loss_elbo.append(elbo.item())
             
             # get mean losses
             loss_recon = np.array(loss_recon).mean()
