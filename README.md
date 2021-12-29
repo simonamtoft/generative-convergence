@@ -43,3 +43,5 @@ This project uses model implementations from the following repositories:
 
 - [VAE, LadderVAE, DRAW models](https://github.com/simonamtoft/recurrence-and-attention-latent-variable-models)
 - [Flow model](https://github.com/didriknielsen/survae_flows)
+
+The toy data is from the [FFJORD paper](https://arxiv.org/abs/1810.01367) (arXiv:1810.01367)
