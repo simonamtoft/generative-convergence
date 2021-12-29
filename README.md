@@ -1,4 +1,4 @@
-# Investigation of Convergence of Generative Models
+# Investigating Convergence Metrics for Deep Generative Models
 
 Modern Generative Models have achieved impressive results in Computer Vision, Natural Language Processing, and Density Estimation. However such results rely on brittle models that achieve convergence through optimization tricks, heavy hyperparameter optimization, and domain knowledge. In this project, we aim to study and compare the robustness of Deep Latent Variable and Flow Models with a focus on the role of random initialization (seed) on the training dynamics.
 
