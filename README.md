@@ -26,7 +26,14 @@ In order to compare convergence of different models, each model is trained a num
 
 ### FFJORD Toy Data
 
-
+|    | model   | data         |   min |   max |   last |   first |   exceeds |
+|---:|:--------|:-------------|------:|------:|-------:|--------:|----------:|
+|  8gaussians | flow    |    |  2.91 |  3.36 |   2.95 |    3.06 |       9.9 |
+|   | lvae    |    |  5.82 | 11.04 |   5.82 |    9.29 |       0   |
+|   | vae     |    |  5.82 | 16.11 |   5.82 |   10.3  |       0   |
+|  checkerboard | flow    |  |  3.58 |  4.23 |   3.63 |    3.79 |       9.5 |
+|   | lvae    |  |  6.92 | 12.42 |   6.92 |   10.48 |       0   |
+|   | vae     |  |  6.91 | 16.86 |   6.91 |   11.52 |       0   |
 
 ### Binarized MNIST 
 
