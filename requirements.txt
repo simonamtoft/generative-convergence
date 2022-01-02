@@ -8,3 +8,4 @@ seaborn
 wandb
 tqdm
 Pillow
+tabulate
