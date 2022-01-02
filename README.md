@@ -27,8 +27,8 @@ In order to compare convergence of different models, each model is trained a num
 For the FFJORD toy data, we've chosen to look at the `8gaussians` and `checkerboard` toy data (see [gen_data](https://github.com/simonamtoft/generative-convergence/blob/main/lib/gen_data.py#L18)). For each of the two datasets, a set of Flow, VAE and LVAE models are trained and computed metrics for, as shown on the plots and table below.
 
 
-![image info](./losses/metrics_8gaussians.png)
-![image info](./losses/metrics_checkerboard.png)
+![metrics 8gaussians](./losses/metrics_8gaussians.png)
+![metrics checkerboard](./losses/metrics_checkerboard.png)
 
 
 |               | model   |   min |   max |   last |   first |   exceeds |
@@ -43,6 +43,8 @@ For the FFJORD toy data, we've chosen to look at the `8gaussians` and `checkerbo
 ### Binarized MNIST 
 
 Additionally, metrics are computed using the binarized MNIST data, where a set fo DRAW, Flow, VAE and LVAE models are trained and computed metrics for, as shown on the plots and table below.
+
+![metrics mnist](./losses/metrics_mnist.png)
 
 | model   |    min |           max |   last |   first |   exceeds |
 |:--------|-------:|--------------:|-------:|--------:|----------:|
