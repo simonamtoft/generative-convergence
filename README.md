@@ -27,14 +27,18 @@ In order to compare convergence of different models, each model is trained a num
 For the FFJORD toy data, we've chosen to look at the `8gaussians` and `checkerboard` toy data (see [gen_data](https://github.com/simonamtoft/generative-convergence/blob/main/lib/gen_data.py#L18)). For each of the two datasets, a set of Flow, VAE and LVAE models are trained and computed metrics for, as shown on the plots and table below.
 
 
-|    | model   |   min |   max |   last |   first |   exceeds |
-|---|:--------|------:|------:|-------:|--------:|----------:|
-|  8gaussians | flow    |  2.91 |  3.36 |   2.95 |    3.06 |       9.9 |
-|   | lvae    |  5.82 | 11.04 |   5.82 |    9.29 |       0   |
-|   | vae     |  5.82 | 16.11 |   5.82 |   10.3  |       0   |
+![image info](./losses/metrics_8gaussians.png)
+![image info](./losses/metrics_checkerboard.png)
+
+
+|               | model   |   min |   max |   last |   first |   exceeds |
+|---------------|:--------|------:|------:|-------:|--------:|----------:|
+|  8gaussians   | flow    |  2.91 |  3.36 |   2.95 |    3.06 |       9.9 |
+|               | lvae    |  5.82 | 11.04 |   5.82 |    9.29 |       0   |
+|               | vae     |  5.82 | 16.11 |   5.82 |   10.3  |       0   |
 |  checkerboard | flow    |  3.58 |  4.23 |   3.63 |    3.79 |       9.5 |
-|   | lvae    |  6.92 | 12.42 |   6.92 |   10.48 |       0   |
-|   | vae     |  6.91 | 16.86 |   6.91 |   11.52 |       0   |
+|               | lvae    |  6.92 | 12.42 |   6.92 |   10.48 |       0   |
+|               | vae     |  6.91 | 16.86 |   6.91 |   11.52 |       0   |
 
 ### Binarized MNIST 
 
@@ -43,7 +47,7 @@ Additionally, metrics are computed using the binarized MNIST data, where a set f
 | model   |    min |           max |   last |   first |   exceeds |
 |:--------|-------:|--------------:|-------:|--------:|----------:|
 | draw    |  86.33 | 373.11        |  86.52 |  221.09 |       0   |
-| flow    | 162.19 |   4.64727e+18 | 176.54 |  267.04 |       2.2 |
+| flow    | 162.19 | 4.64727e+18   | 176.54 |  267.04 |       2.2 |
 | lvae    | 125.87 | 306.51        | 126.11 |  252.48 |       0   |
 | vae     | 124.65 | 283.04        | 125.07 |  243.93 |       0.1 |
 
