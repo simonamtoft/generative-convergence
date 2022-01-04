@@ -7,15 +7,30 @@ The project is carried out by [Simon Amtoft Pedersen](https://github.com/simonam
 
 ## Adapting Autoencoders to Two-dimensional Toy Data
 
-In order to train autoencoders such as the standard variational autoencoder (VAE) or a hierarchical autoencoder such as the ladder variational autoencoder (LVAE), the training approach has to be adapted. These models have a generative part given by <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;p(z)&space;=&space;p(x|z)\cdot&space;p(z)#gh-dark-mode-only" title="\bg_black p(z) = p(x|z)\cdot p(z)" />, where we try to model the original distribution of the data with `p`, such that we can draw samples with <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;z&space;\sim&space;p(z)" title="\bg_black z \sim p(z)" /> and <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;x&space;\sim&space;p(x|z)" title="\bg_black x \sim p(x|z)" />. This is done by encoding the original data into the latent space, using the distribution `q`, such that reconstructed images can be created by drawing from <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;q(z|x)" title="\bg_black q(z|x)" />.
+In order to train autoencoders such as the standard variational autoencoder (VAE) or a hierarchical autoencoder such as the ladder variational autoencoder (LVAE), the training approach has to be adapted. These models have a generative part given by 
+![GitHub-Mark-Light](https://user-images.githubusercontent.com/3369400/139447912-e0f43f33-6d9f-45f8-be46-2df5bbc91289.png#gh-dark-mode-only)
+<img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;p(z)&space;=&space;p(x|z)\cdot&space;p(z)" title="\bg_black p(z) = p(x|z)\cdot p(z)" />
+, where we try to model the original distribution of the data with `p`
+, such that we can draw samples with 
+<img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;z&space;\sim&space;p(z)" title="\bg_black z \sim p(z)" /> 
+and 
+<img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;x&space;\sim&space;p(x|z)" title="\bg_black x \sim p(x|z)" />
+. This is done by encoding the original data into the latent space, using the distribution `q`, such that reconstructed images can be created by drawing from 
+<img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;q(z|x)" title="\bg_black q(z|x)" />.
 
-The training of either of these two models optimize the evidence lower bound (ELBO) <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;\mathcal{L}_{ELBO}&space;=&space;\mathcal{L}_{KL}&space;&plus;&space;\mathcal{L}_{recon}" title="\bg_black \mathcal{L}_{ELBO} = \mathcal{L}_{KL} + \mathcal{L}_{recon}" />, consisting of a reconstruction and a Kullback–Leibler (KL) divergence term. The difference in training on two-dimensional data instead of standard image data like MNIST is the way in which we use the reconstruction term, while the KL term is calculated by learned distributions with: 
+The training of either of these two models optimize the evidence lower bound (ELBO) 
+<img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;\mathcal{L}_{ELBO}&space;=&space;\mathcal{L}_{KL}&space;&plus;&space;\mathcal{L}_{recon}" title="\bg_black \mathcal{L}_{ELBO} = \mathcal{L}_{KL} + \mathcal{L}_{recon}" />
+, consisting of a reconstruction and a Kullback–Leibler (KL) divergence term. The difference in training on two-dimensional data instead of standard image data like MNIST is the way in which we use the reconstruction term, while the KL term is calculated by learned distributions with: 
 
 <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;\mathcal{L}_{KL}&space;=&space;KL(q||p)&space;=&space;\mathbb{E}_q&space;\left[log&space;\frac{p(z)}{q(z|x)}&space;\right]" title="\bg_black \mathcal{L}_{KL} = KL(q||p) = \mathbb{E}_q \left[log \frac{p(z)}{q(z|x)} \right]" /> 
 
 For binarized MNIST data, the reconstruction term is simply the binary cross-entropy loss between the original images and the reconstructed images achieved from a pass through of the model. 
 
-A way to adapt the autoencoder models is to model each dimension of the data with a mean and variance, such that the decoder outputs these <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;[\mu_x,&space;\sigma_x]&space;\sim&space;x&space;" title="\bg_black [\mu_x, \sigma_x] \sim x " />. Then a likelihood distribution is created from this decoder output, <img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;\mathcal{N}(\mu_x,&space;\sigma_x)" title="\bg_black \mathcal{N}(\mu_x, \sigma_x)" /> from which we compute the log probability of the input two-dimensional data point to originate from such a distribution, which is then our reconstruction term (see [implementation](https://github.com/simonamtoft/generative-convergence/blob/main/trainers_toy/train_vae.py#L69)).
+A way to adapt the autoencoder models is to model each dimension of the data with a mean and variance, such that the decoder outputs these 
+<img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;[\mu_x,&space;\sigma_x]&space;\sim&space;x&space;" title="\bg_black [\mu_x, \sigma_x] \sim x " />
+. Then a likelihood distribution is created from this decoder output, 
+<img src="https://latex.codecogs.com/png.image?\dpi{120}&space;\bg_black&space;\mathcal{N}(\mu_x,&space;\sigma_x)" title="\bg_black \mathcal{N}(\mu_x, \sigma_x)" />
+ from which we compute the log probability of the input two-dimensional data point to originate from such a distribution, which is then our reconstruction term (see [implementation](https://github.com/simonamtoft/generative-convergence/blob/main/trainers_toy/train_vae.py#L69)).
 
 
 
