@@ -23,8 +23,8 @@ A way to adapt the autoencoder models is to model each dimension of the data wit
 In order to compare convergence of different models, each model is trained a number of times (e.g. 10), from which metrics on the test losses for each epoch during training can be calculated. For each of these runs, a different random seed is used for all used procedures (see [seed_everything](https://github.com/simonamtoft/generative-convergence/blob/main/lib/random_seed.py)). Then, the min, max and final test loss is taken from each run, along with computing the mean over the first five epochs. This is done for each of the 10 runs of each model on the different datasets, where the mean is taken over the 10 runs which has different random initializations.
 
 
-### FFJORD Toy Data
-For the FFJORD toy data, we've chosen to look at the `8gaussians` and `checkerboard` toy data (see [gen_data](https://github.com/simonamtoft/generative-convergence/blob/main/lib/gen_data.py#L18)). For each of the two datasets, a set of Flow, VAE and LVAE models are trained and computed metrics for, as shown on the plots and table below.
+### Toy Data
+For the toy data, we've chosen to look at the `8gaussians` and `checkerboard` toy data from the FFJORD paper (see [gen_data](https://github.com/simonamtoft/generative-convergence/blob/main/lib/gen_data.py#L18)). For each of the two datasets, a set of Flow, VAE and LVAE models are trained and computed metrics for, as shown on the plots and table below.
 
 
 ![metrics 8gaussians](./losses/metrics_8gaussians.png)
@@ -93,5 +93,13 @@ This project uses model implementations from the following repositories:
 
 - [VAE, LadderVAE, DRAW models](https://github.com/simonamtoft/recurrence-and-attention-latent-variable-models)
 - [Flow model](https://github.com/didriknielsen/survae_flows)
+- [Toy Data Generation](https://github.com/simonamtoft/tfde-tfp/blob/main/datasets/toy_data.py)
 
-The toy data is from the [FFJORD paper](https://arxiv.org/abs/1810.01367) (arXiv:1810.01367)
+Which originates in the theory from the following papers:
+
+- Diederik P. Kingma & Max Welling: An Introduction to Variational Autoencoders, [arXiv:1906.02691](https://arxiv.org/abs/1906.02691)
+- Carl Doersch: Tutorial on Variational Autoencoders, [arXiv:1606.05908](https://arxiv.org/abs/1606.05908)
+- Casper Kaae Sønderby, Tapani Raiko, Lars Maaløe, Søren Kaae Sønderby & Ole Winther: Ladder Variational Autoencoders, [arXiv:1602.02282](https://arxiv.org/abs/1602.02282)
+- Karol Gregor, Ivo Danihelka, Alex Graves, Danilo Jimenez Rezende & Daan Wierstra: DRAW, A Recurrent Neural Network For Image Generation, [arXiv:1502.04623](https://arxiv.org/abs/1502.04623)
+- Will Grathwohl, Ricky T. Q. Chen, Jesse Bettencourt, Ilya Sutskever & David Duvenaud: FFJORD, Free-form Continuous Dynamics for Scalable Reversible Generative Models, [	arXiv:1810.01367](https://arxiv.org/abs/1810.01367)
+- Didrik Nielsen, Priyank Jaini, Emiel Hoogeboom, Ole Winther & Max Welling: SurVAE Flows, Surjections to Bridge the Gap between VAEs and Flows, [arXiv:2007.02731](https://arxiv.org/abs/2007.02731)
