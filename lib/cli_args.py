@@ -5,10 +5,10 @@ def get_args(data_names: list, config: dict) -> tuple:
     parser = argparse.ArgumentParser(description="Model training script.")
     parser.add_argument(
         '-m', 
-        help='Pick which model to train (default: vae).', 
+        help='Pick which model to train (default: vae).',
         default='vae',
         type=str,
-        choices=['lvae', 'vae', 'draw', 'flow'],
+        choices=['lvae', 'vae', 'draw', 'flow', 'draw2', 'draw3'],
         dest='model'
     )
     if data_names:

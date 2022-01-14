@@ -14,7 +14,8 @@ from models import DRAW, VariationalAutoencoder, LadderVAE, \
     Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
     ElementwiseParams, StandardNormal, Squeeze2d, Augment, \
     UniformDequantization, DenseNet, ElementwiseParams2d, \
-    StandardUniform, Slice, ActNormBijection2d, Conv1x1
+    StandardUniform, Slice, ActNormBijection2d, Conv1x1, \
+    DRAW2, DRAW3
 
 from lib import seed_everything, get_args
 from trainers import train_draw, train_vae, train_flow
@@ -33,7 +34,8 @@ CONFIG = {
 }
 
 DIRS = ['saved_models', 'log_images', 'losses']
-WANDB_NAME = "generative-convergence-mnist"
+# WANDB_NAME = "generative-convergence-mnist"
+WANDB_NAME = "draw-tests"
 
 
 def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader: DataLoader, val_loader: DataLoader) -> tuple:
@@ -54,7 +56,7 @@ def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader:
         # perform training
         print(json.dumps(config, sort_keys=False, indent=4) + '\n')
         train_losses, val_losses = train_vae(train_loader, val_loader, model, config, mute, WANDB_NAME)
-    elif config['model'] == 'draw':
+    elif 'draw' in config['model']:
         config['h_dim'] = 256
         config['z_dim'] = 32
         config['T'] = 10
@@ -62,11 +64,32 @@ def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader:
         config['attention'] = 'base'
 
         # Instantiate model
-        model = DRAW(config, x_shape).to(config['device'])
+        if config['model'][-1] == 'w':
+            print("DRAW")
+            model = DRAW(config, x_shape).to(config['device'])
+        elif config['model'][-1] == '2':
+            print("DRAW2")
+            model = DRAW2(config, x_shape).to(config['device'])
+        elif config['model'][-1] == '3':
+            print("DRAW3")
+            model = DRAW3(config, x_shape).to(config['device'])
 
         # perform training
         print(json.dumps(config, sort_keys=False, indent=4) + '\n')
         train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
+    # elif config['model'] == 'draw2':
+    #     config['h_dim'] = 256
+    #     config['z_dim'] = 32
+    #     config['T'] = 10
+    #     config['N'] = 12
+    #     config['attention'] = 'base'
+
+    #     # Instantiate model
+    #     model = DRAW2(config, x_shape).to(config['device'])
+
+    #     # perform training
+    #     print(json.dumps(config, sort_keys=False, indent=4) + '\n')
+    #     train_losses, val_losses = train_draw(train_loader, val_loader, model, config, mute, WANDB_NAME)
     elif config['model'] == 'flow':
         def net(channels):
             return nn.Sequential(
