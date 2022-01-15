@@ -139,7 +139,7 @@ def train_draw(train_loader, val_loader, model, config, mute, wandb_name):
             x_sample = model.sample()
 
             # Log images to wandb
-            log_images(x_hat, x_sample, str(epoch) + 'draw')
+            log_images(x_hat, x_sample, str(epoch) + config['model'])
 
     # Finalize training
     torch.save(model, './saved_models/draw_model.pt')

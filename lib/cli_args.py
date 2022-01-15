@@ -8,7 +8,7 @@ def get_args(data_names: list, config: dict) -> tuple:
         help='Pick which model to train (default: vae).',
         default='vae',
         type=str,
-        choices=['lvae', 'vae', 'draw', 'flow', 'draw2', 'draw3'],
+        choices=['lvae', 'vae', 'draw', 'flow', 'draw2', 'draw3', 'draw4'],
         dest='model'
     )
     if data_names:
