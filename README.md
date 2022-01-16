@@ -57,6 +57,41 @@ Additionally, metrics are computed using the binarized MNIST data, where a set f
 | vae     | 124.65 | 283.04        | 125.07 |  243.93 |       0.1 |
 
 
+### DRAW Variations
+
+In addition to compare these different models, on different datasets, a comparison on the metrics of the DRAW model alongside with a couple of variations are made, in order to determine how important some of these model features are, evaluated on the binarized MNIST data. The different variations are:
+
+- draw2: Base attention DRAW implementation, without using the error image, making the read operation simply return x, thus the encoders input is then just x and the previous decoder output.
+- draw3: Base attention DRAW implementation, without iteratively updating the canvas. Instead the canvas is simply given by the write operation at each timestep t.
+- draw4: Base attention DRAW implementation, without error image and without canvas iteration.
+
+![metrics draw](./losses/metrics_draw.png)
+
+| model   |   min |    max |   last |   first |   exceeds |
+|:--------|------:|-------:|-------:|--------:|----------:|
+| draw2   | 86.02 | 328.89 |  86.2  |  207.49 |         0 |
+| draw3   | 85.85 | 271.92 |  85.99 |  200.6  |         0 |
+| draw4   | 85.67 | 262.82 |  85.79 |  193.82 |         0 |
+| draw    | 86.33 | 373.11 |  86.52 |  221.09 |         0 |
+
+### Model Parameters
+
+In order to ensure that the comparisons of metrics for different models on the same dataset is somewhat fair, the number of free parameters of each model are computed, such that we see that the best performing models are not best because them just having a larger number of parameters.
+
+| Model	| MNIST	| Toy |
+| :-----| ----: |----:|
+|flow	|3634680|	82824 |
+|lvae	|1464464|	79164 |
+|vae	|1162000|	68620 |
+|draw	|3262304|	n/a |
+|draw2	|2459488|	n/a |
+|draw3	|3262304|	n/a |
+|draw4	|2459488|	n/a |
+
+From this table we see that e.g. for MNIST, the flow model had the largest number of trainable parameters, but it had the worst performance in regards to the different training metrics, and stability of training (shown with the variance of the bar plot).
+
+
+
 ## Model Training
 
 Training a model on toy data can be run by simply
