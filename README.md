@@ -69,10 +69,12 @@ In addition to compare these different models, on different datasets, a comparis
 
 | model   |   min |    max |   last |   first |   exceeds |
 |:--------|------:|-------:|-------:|--------:|----------:|
+| draw    | 86.33 | 373.11 |  86.52 |  221.09 |         0 |
 | draw2   | 86.02 | 328.89 |  86.2  |  207.49 |         0 |
 | draw3   | 85.85 | 271.92 |  85.99 |  200.6  |         0 |
 | draw4   | 85.67 | 262.82 |  85.79 |  193.82 |         0 |
-| draw    | 86.33 | 373.11 |  86.52 |  221.09 |         0 |
+
+Here we see that the resulting validation loss metrics are nearly equal in regards to the min and last loss, but that the full draw version is actually the worst in regards to the initial and maximum loss recorded. This is somewhat counter-intuitive, but might not be true for more complex datasets, or when using the Filterbank attention instead of base.
 
 ### Model Parameters
 
