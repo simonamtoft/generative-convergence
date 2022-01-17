@@ -133,8 +133,14 @@ def setup_and_train(config: dict, mute: bool, x_shape: list, train_loader: DataL
 
 
 # binarize transformation
-def tmp_lambda(x):
+def binarize(x):
+    """Used as lambda function to binarize data x"""
     return torch.bernoulli(x)
+
+def inv_binarize(x):
+    """Used as lambda function to binarize data x 
+        and reverse black and white"""
+    return 1 - torch.bernoulli(x)
 
 
 if __name__ == '__main__':
@@ -163,23 +169,25 @@ if __name__ == '__main__':
     data_shape = [data_dim, data_dim]
 
     # Define data transform
-    data_transform = [
-        ToTensor(),
-        Lambda(tmp_lambda)
-    ]
+    data_transform = [ToTensor()]
 
     # load in the data
     if config['dataset'] == 'mnist':
+        # Add binarization
+        data_transform.append(Lambda(binarize))
+
         # get MNIST data
         train_data = MNIST(DATA_FOLDER, download=True, transform=Compose(data_transform))
 
         # define split
         data_split = [50000, 10000]
     elif config['dataset'] == 'omniglot':
+        # Add inverse binarization
+        data_transform.append(Lambda(inv_binarize))
+
         # Add resize transformation
         data_transform.append(Resize(data_dim))
         data_transform.append(CenterCrop(data_dim))
-        data_transform.append(invert)
 
         # get Omniglot data
         train_data = Omniglot(DATA_FOLDER, download=True, transform=Compose(data_transform))
