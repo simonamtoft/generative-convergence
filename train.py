@@ -11,6 +11,7 @@ from torchvision.datasets import MNIST, CIFAR10, \
     Omniglot
 from torchvision.transforms import Compose, ToTensor, \
     Lambda, Normalize, CenterCrop, Resize
+from torchvision.transforms.functional import invert
 
 from models import DRAW, VariationalAutoencoder, LadderVAE, \
     Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
@@ -178,6 +179,7 @@ if __name__ == '__main__':
         # Add resize transformation
         data_transform.append(Resize(data_dim))
         data_transform.append(CenterCrop(data_dim))
+        data_transform.append(invert)
 
         # get Omniglot data
         train_data = Omniglot(DATA_FOLDER, download=True, transform=Compose(data_transform))
