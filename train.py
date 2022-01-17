@@ -137,7 +137,7 @@ def tmp_lambda(x):
 
 if __name__ == '__main__':
     # add arguments to config
-    config, args = get_args(['mnist', 'cifar10', 'omniglot'], CONFIG, data_default='mnist')
+    config, args = get_args(['mnist', 'omniglot'], CONFIG, data_default='mnist')
 
     # create necessary folders
     for directory in DIRS:
