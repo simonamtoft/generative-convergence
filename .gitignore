@@ -137,3 +137,7 @@ data/*
 
 *.err
 *.out
+
+
+train_toy.sh
+train.sh
