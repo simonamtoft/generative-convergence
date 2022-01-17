@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST, CIFAR10, \
     Omniglot
 from torchvision.transforms import Compose, ToTensor, \
-    Lambda, Normalize
+    Lambda, Normalize, CenterCrop, Resize
 
 from models import DRAW, VariationalAutoencoder, LadderVAE, \
     Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
@@ -22,6 +22,7 @@ from models import DRAW, VariationalAutoencoder, LadderVAE, \
 from lib import seed_everything, get_args
 from trainers import train_draw, train_vae, train_flow
 
+DATA_FOLDER = './data/'
 
 CONFIG = {
     'optimizer': 'adam',
@@ -35,12 +36,12 @@ CONFIG = {
     'kl_warmup': 100,
 }
 
-DIRS = ['saved_models', 'log_images', 'losses']
+DIRS = ['saved_models', 'log_images', 'losses', 'data']
 # WANDB_NAME = "generative-convergence-mnist"
 WANDB_NAME = "draw-tests"
 
 
-def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader: DataLoader, val_loader: DataLoader) -> tuple:
+def setup_and_train(config: dict, mute: bool, x_shape: list, train_loader: DataLoader, val_loader: DataLoader) -> tuple:
     if 'vae' in config['model']:
         config['as_beta'] = True
         x_dim = x_shape[0] * x_shape[1]
@@ -62,7 +63,7 @@ def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader:
         config['h_dim'] = 256
         config['z_dim'] = 32
         config['T'] = 10
-        config['N'] = 12
+        config['N'] = 12       # only used for filterbank...
         config['attention'] = 'base'
 
         # Instantiate model
@@ -130,7 +131,7 @@ def setup_and_train(config: dict, mute: bool, x_shape: torch.Size, train_loader:
     return train_losses, val_losses
 
 
-# Define transformation
+# binarize transformation
 def tmp_lambda(x):
     return torch.bernoulli(x)
 
@@ -145,30 +146,41 @@ if __name__ == '__main__':
             print(f'Creating directory "{directory}"...')
             os.mkdir(f'./{directory}')
 
-    # check if cuda
+    # setup data arguments
+    kwargs = {}
+
+    # enable cuda if available
     if torch.cuda.is_available():
         config['device'] = 'cuda'
-        kwargs = {'num_workers': 4, 'pin_memory': True}
+        kwargs['num_workers'] = 4
+        kwargs['pin_memory'] = True
     else:
         config['device'] = 'cpu'
-        kwargs = {}
+
+    # Set the standard shape of the data
+    data_dim = 28
+    data_shape = [data_dim, data_dim]
 
     # Define data transform
-    data_transform = Compose([
+    data_transform = [
         ToTensor(),
         Lambda(tmp_lambda)
-    ])
+    ]
 
     # load in the data
     if config['dataset'] == 'mnist':
         # get MNIST data
-        train_data = MNIST('./data/', download=True, transform=data_transform)
+        train_data = MNIST(DATA_FOLDER, download=True, transform=Compose(data_transform))
 
         # define split
         data_split = [50000, 10000]
     elif config['dataset'] == 'omniglot':
+        # Add resize transformation
+        data_transform.append(Resize(data_dim))
+        data_transform.append(CenterCrop(data_dim))
+
         # get Omniglot data
-        train_data = Omniglot('./data/', download=True, transform=data_transform)
+        train_data = Omniglot(DATA_FOLDER, download=True, transform=Compose(data_transform))
 
         # define split
         data_split = [15424, 3856]
@@ -190,13 +202,9 @@ if __name__ == '__main__':
         **kwargs
     )
 
-    # get shape of input
-    data_iter = iter(train_loader)
-    images, labels = data_iter.next()
-    x_shape = images.shape[2:4]
-
     # mute weight and biases prints
-    os.environ["WANDB_SILENT"] = "true"
+    if args['mute']:
+        os.environ["WANDB_SILENT"] = "true"
 
     # train using different seeds
     seeds = np.random.randint(0, 1e6, args['n_runs'])
@@ -205,7 +213,7 @@ if __name__ == '__main__':
         seed = seeds[i]
         print(f"\nTraining with seed {seed} ({i+1}/{args['n_runs']})")
         seed_everything(seed)
-        train, val = setup_and_train(config, args['mute'], x_shape, train_loader, val_loader)
+        train, val = setup_and_train(config, args['mute'], data_shape, train_loader, val_loader)
         losses['train'].append(train)
         losses['val'].append(val)
     print('\nFinished all training runs...')
