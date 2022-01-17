@@ -133,6 +133,7 @@ tester.ipynb
 saved_models/*
 log_images/*
 MNIST/*
+data/*
 
 *.err
 *.out
