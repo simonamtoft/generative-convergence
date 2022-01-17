@@ -7,8 +7,10 @@ import torch
 import torch.nn as nn
 
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
-from torchvision.transforms import Compose, ToTensor, Lambda
+from torchvision.datasets import MNIST, CIFAR10, \
+    Omniglot
+from torchvision.transforms import Compose, ToTensor, \
+    Lambda, Normalize
 
 from models import DRAW, VariationalAutoencoder, LadderVAE, \
     Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
@@ -135,7 +137,7 @@ def tmp_lambda(x):
 
 if __name__ == '__main__':
     # add arguments to config
-    config, args = get_args([], CONFIG)
+    config, args = get_args(['mnist', 'cifar10', 'omniglot'], CONFIG, data_default='mnist')
 
     # create necessary folders
     for directory in DIRS:
@@ -151,15 +153,28 @@ if __name__ == '__main__':
         config['device'] = 'cpu'
         kwargs = {}
 
-    # get train and validation data
+    # Define data transform
     data_transform = Compose([
         ToTensor(),
         Lambda(tmp_lambda)
     ])
-    train_data = MNIST('./', download=True, transform=data_transform)
 
+    # load in the data
+    if config['dataset'] == 'mnist':
+        # get MNIST data
+        train_data = MNIST('./data/', download=True, transform=data_transform)
+
+        # define split
+        data_split = [50000, 10000]
+    elif config['dataset'] == 'omniglot':
+        # get Omniglot data
+        train_data = Omniglot('./data/', download=True, transform=data_transform)
+
+        # define split
+        data_split = [15424, 3856]
+    
     # split into training and validation sets
-    train_set, val_set = torch.utils.data.random_split(train_data, [50000, 10000])
+    train_set, val_set = torch.utils.data.random_split(train_data, data_split)
 
     # Setup data loaders
     train_loader = DataLoader(

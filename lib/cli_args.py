@@ -1,7 +1,7 @@
 import argparse
 
 
-def get_args(data_names: list, config: dict) -> tuple:
+def get_args(data_names: list, config: dict, data_default: str='8gaussians') -> tuple:
     parser = argparse.ArgumentParser(description="Model training script.")
     parser.add_argument(
         '-m', 
@@ -14,8 +14,8 @@ def get_args(data_names: list, config: dict) -> tuple:
     if data_names:
         parser.add_argument(
             '-d', 
-            help='Pick which dataset to fit to (default: 8gaussians).', 
-            default='8gaussians',
+            help=f'Pick which dataset to fit to (default: {data_default}).', 
+            default=data_default,
             type=str,
             choices=data_names,
             dest='dataset'
