@@ -68,17 +68,18 @@ def bce_loss(r, x):
 
 def plt_img_save(img, name='log_image.png'):
     N = img.shape[0]
+    k = int(np.sqrt(img.shape[1]))
     if N >= 16:
         f, ax = plt.subplots(2, 8, figsize=(16, 4))
         for i in range(8):
             idx = i*2
             for j in range(2):
-                ax[j, i].imshow(np.reshape(img[idx+j, :], (28, 28)), cmap='gray')
+                ax[j, i].imshow(np.reshape(img[idx+j, :], (k, k)), cmap='gray')
                 ax[j, i].axis('off')
     else:
         f, ax = plt.subplots(1, N, figsize=(16, 4))
         for i in range(N):
-            ax[i].imshow(np.reshape(img[i, :], (28, 28)), cmap='gray')
+            ax[i].imshow(np.reshape(img[i, :], (k, k)), cmap='gray')
             ax[i].axis('off')
     
     f.savefig(name, transparent=True, bbox_inches='tight')
