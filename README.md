@@ -59,20 +59,26 @@ Additionally, metrics are computed using the binarized MNIST data, where a set f
 
 ### DRAW Variations
 
-In addition to compare these different models, on different datasets, a comparison on the metrics of the DRAW model alongside with a couple of variations are made, in order to determine how important some of these model features are, evaluated on the binarized MNIST data. The different variations are:
+In addition to comparing these different models, on different datasets, a comparison on the metrics of the DRAW model alongside with a couple of variations are made, in order to determine how important some of these model features are, evaluated on the binarized MNIST and Omniglot datasets. The different variations are:
 
 - draw2: Base attention DRAW implementation, without using the error image, making the read operation simply return x, thus the encoders input is then just x and the previous decoder output.
 - draw3: Base attention DRAW implementation, without iteratively updating the canvas. Instead the canvas is simply given by the write operation at each timestep t.
 - draw4: Base attention DRAW implementation, without error image and without canvas iteration.
 
-![metrics draw](./losses/metrics_draw.png)
+![metrics draw mnist](./losses/metrics_draw_mnist.png)
 
-| model   |   min |    max |   last |   first |   exceeds |
-|:--------|------:|-------:|-------:|--------:|----------:|
-| draw    | 86.33 | 373.11 |  86.52 |  221.09 |         0 |
-| draw2   | 86.02 | 328.89 |  86.2  |  207.49 |         0 |
-| draw3   | 85.85 | 271.92 |  85.99 |  200.6  |         0 |
-| draw4   | 85.67 | 262.82 |  85.79 |  193.82 |         0 |
+![metrics draw omniglot](./losses/metrics_draw_omniglot.png)
+
+|           | model   |    min |    max |   last |   first |   exceeds |
+|:----------|:--------|-------:|-------:|-------:|--------:|----------:|
+|  omniglot | draw    | 114.75 | 242.02 | 117.42 |  211.93 |         0 |
+|           | draw2   | 113.67 | 283.27 | 117.62 |  223.96 |         0 |
+|           | draw3   | 109.56 | 213.01 | 114.96 |  180.19 |         0 |
+|           | draw4   | 108.32 | 199.68 | 115.28 |  177.38 |         0 |
+|  mnist    | draw    |  86.33 | 373.11 |  86.52 |  221.09 |         0 |
+|           | draw2   |  86.02 | 328.89 |  86.2  |  207.49 |         0 |
+|           | draw3   |  85.85 | 271.92 |  85.99 |  200.6  |         0 |
+|           | draw4   |  85.67 | 262.82 |  85.79 |  193.82 |         0 |
 
 Here we see that the resulting validation loss metrics are nearly equal in regards to the min and last loss, but that the full draw version is actually the worst in regards to the initial and maximum loss recorded. This is somewhat counter-intuitive, but might not be true for more complex datasets, or when using the Filterbank attention instead of base.
 
