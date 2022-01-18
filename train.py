@@ -11,7 +11,6 @@ from torchvision.datasets import MNIST, CIFAR10, \
     Omniglot
 from torchvision.transforms import Compose, ToTensor, \
     Lambda, Normalize, CenterCrop, Resize
-from torchvision.transforms.functional import invert
 
 from models import DRAW, VariationalAutoencoder, LadderVAE, \
     Flow, AffineCouplingBijection, ActNormBijection, Reverse, \
@@ -229,7 +228,7 @@ if __name__ == '__main__':
     print('\nFinished all training runs...')
 
     # save loss results to file
-    filename = f'./losses/{config["model"]}_mnist_{args["n_runs"]}.json'
+    filename = f'./losses/{config["model"]}_{config['dataset']}_{args["n_runs"]}.json'
     print(f'Saving losses to file {filename}')
     with open(filename, 'w') as f:
         json.dump(losses, f)
