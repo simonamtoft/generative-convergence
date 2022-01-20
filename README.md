@@ -80,20 +80,19 @@ The first variation is the base attention DRAW implementation, but without compu
 
 The equations then become:
 
+<img src="https://latex.codecogs.com/svg.image?\\&space;h_t^{enc}&space;=&space;RNN^{enc}(h_{t-1}^{enc},&space;[x,&space;h_{t-1}^{dec}])&space;\\z_t&space;\sim&space;Q(z_t&space;|&space;h_t^{enc})&space;\\h_t^{dec}&space;=&space;RNN^{dec}(h_{t-1}^{dec},&space;z_t)&space;\\c_t&space;=&space;c_{t-1}&space;&plus;&space;write(h_t^{dec})&space;&space;\\read(x,&space;\hat{x}_t,&space;h_{t-1}^{dec})&space;=&space;x&space;\\write(h_t^{dec})&space;=&space;W(h_t^{dec})&space;" title="\\ h_t^{enc} = RNN^{enc}(h_{t-1}^{enc}, [x, h_{t-1}^{dec}]) \\z_t \sim Q(z_t | h_t^{enc}) \\h_t^{dec} = RNN^{dec}(h_{t-1}^{dec}, z_t) \\c_t = c_{t-1} + write(h_t^{dec}) \\read(x, \hat{x}_t, h_{t-1}^{dec}) = x \\write(h_t^{dec}) = W(h_t^{dec}) " />
+
 #### Draw 3 (without canvas updates)
 
 The equations then become:
 
 #### Draw 4 (w/o error image and canvas updates)
 
-This variation combines the two previously mentioned variations, such that we have the base attention DRAW implementation, but without both the error image and having a canvas that iteratively updates for each timestep t.
+This variation combines the two previously mentioned variations, such that we have the base attention DRAW implementation, but without both the error image and having a canvas that iteratively updates for each timestep `t`.
 
 
-In addition to compare these different models, on different datasets, a comparison on the metrics of the DRAW model alongside with a couple of variations are made, in order to determine how important some of these model features are, evaluated on the binarized MNIST data. The different variations are:
-
-- draw2: Base attention DRAW implementation, without using the error image, making the read operation simply return x, thus the encoders input is then just x and the previous decoder output.
-- draw3: Base attention DRAW implementation, without iteratively updating the canvas. Instead the canvas is simply given by the write operation at each timestep t.
-- draw4: Base attention DRAW implementation, without error image and without canvas iteration.
+#### Evaluating Performance of Variations
+Finally, we evaluate the standard DRAW implementation alongside the three variations just described, according to the same loss metrics as earlier, which results in the followings barplots and metrics table. This is done both for the binarized MNIST and Omniglot datasets, in order to see if some implementation might be better for more advaned datasets. 
 
 ![metrics draw mnist](./losses/metrics_draw_mnist.png)
 
