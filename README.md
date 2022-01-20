@@ -95,7 +95,7 @@ This variation combines the two previously mentioned variations, such that we ha
 
 The equations then become:
 
-<img src="https://latex.codecogs.com/svg.image?\\&space;h_t^{enc}&space;=&space;RNN^{enc}(h_{t-1}^{enc},&space;[x,&space;h_{t-1}^{dec}])&space;\\z_t&space;\sim&space;Q(z_t&space;|&space;h_t^{enc})&space;\\h_t^{dec}&space;=&space;RNN^{dec}(h_{t-1}^{dec},&space;z_t)&space;\\c_t&space;=&space;write(h_t^{dec})&space;&space;\\read(x,&space;\hat{x}_t,&space;h_{t-1}^{dec})&space;=&space;x&space;\\write(h_t^{dec})&space;=&space;W(h_t^{dec})&space;" title="\\ h_t^{enc} = RNN^{enc}(h_{t-1}^{enc}, [x, h_{t-1}^{dec}]) \\z_t \sim Q(z_t | h_t^{enc}) \\h_t^{dec} = RNN^{dec}(h_{t-1}^{dec}, z_t) \\c_t = write(h_t^{dec}) \\read(x, \hat{x}_t, h_{t-1}^{dec}) = x \\write(h_t^{dec}) = W(h_t^{dec}) " />
+<img src="https://latex.codecogs.com/svg.image?\\&space;h_t^{enc}&space;=&space;RNN^{enc}(h_{t-1}^{enc},&space;[x,&space;h_{t-1}^{dec}])&space;\\z_t&space;\sim&space;Q(z_t&space;|&space;h_t^{enc})&space;\\h_t^{dec}&space;=&space;RNN^{dec}(h_{t-1}^{dec},&space;z_t)&space;\\c_t&space;=&space;write(h_t^{dec})&space;&space;\\write(h_t^{dec})&space;=&space;W(h_t^{dec})&space;" title="\\ h_t^{enc} = RNN^{enc}(h_{t-1}^{enc}, [x, h_{t-1}^{dec}]) \\z_t \sim Q(z_t | h_t^{enc}) \\h_t^{dec} = RNN^{dec}(h_{t-1}^{dec}, z_t) \\c_t = write(h_t^{dec}) \\write(h_t^{dec}) = W(h_t^{dec}) " />
 
 
 #### Evaluating Performance of Variations
