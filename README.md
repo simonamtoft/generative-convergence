@@ -59,6 +59,32 @@ Additionally, metrics are computed using the binarized MNIST data, where a set f
 
 ### DRAW Variations
 
+In addition to the above metrics comparisons, an investegation of the different DRAW features are made. In addition to the DRAW implementation with the base attention module, which has a linear layer for the write operation, three variations are created. 
+
+The equations for the full base attention DRAW implementation is given by:
+<img src="https://latex.codecogs.com/svg.image?\mu_t&space;=&space;W(h_t^{enc}),&space;\;\;\;&space;\;\;&space;\sigma_t&space;=&space;\exp(W(h_t^{enc}))" title="\mu_t = W(h_t^{enc}), \;\;\; \;\; \sigma_t = \exp(W(h_t^{enc}))" />
+<img src="https://latex.codecogs.com/svg.image?z_t&space;\sim&space;Q(z_t|h_t^{enc})" title="z_t \sim Q(z_t|h_t^{enc})" />
+<img src="https://latex.codecogs.com/svg.image?\!\!\!\!\!\!\!\!\!&space;\hat{x}_t&space;=&space;x&space;-&space;\sigma(c_{t-1})\\r_t&space;=&space;read(x_t,\hat{x}_t,h_{t-1}^{dec})\\h_t^{enc}&space;=&space;RNN^{enc}(h_{t-1}^{enc},&space;[r_t,&space;h_{t-1}^{dec}]])\\z_t&space;\sim&space;Q(z_t|h_t^{enc})\\h_t^{dec}&space;=&space;RNN^{dec}(h_{t-1}^{dec},&space;z_t)\\c_t&space;=&space;c_{t-1}&space;&plus;&space;write(h_t^{dec})&space;" title="\!\!\!\!\!\!\!\!\! \hat{x}_t = x - \sigma(c_{t-1})\\r_t = read(x_t,\hat{x}_t,h_{t-1}^{dec})\\h_t^{enc} = RNN^{enc}(h_{t-1}^{enc}, [r_t, h_{t-1}^{dec}]])\\z_t \sim Q(z_t|h_t^{enc})\\h_t^{dec} = RNN^{dec}(h_{t-1}^{dec}, z_t)\\c_t = c_{t-1} + write(h_t^{dec}) " />
+<img src="https://latex.codecogs.com/svg.image?\!\!\!\!\!\!\!\!\!\tilde{z}_t&space;\sim&space;p(z_t)\\\tilde{h}_t^{dec}&space;=&space;RNN^{dec}(\tilde{h}_{t-1}^{dec},\tilde{z})\\\tilde{c}_t&space;=&space;\tilde{c}_{t-1}&space;&plus;&space;write(\tilde{h}_t^{dec})\\\tilde{x}&space;\sim&space;D(X|\tilde{c}_T)&space;" title="\!\!\!\!\!\!\!\!\!\tilde{z}_t \sim p(z_t)\\\tilde{h}_t^{dec} = RNN^{dec}(\tilde{h}_{t-1}^{dec},\tilde{z})\\\tilde{c}_t = \tilde{c}_{t-1} + write(\tilde{h}_t^{dec})\\\tilde{x} \sim D(X|\tilde{c}_T) " />
+
+<img src="https://latex.codecogs.com/svg.image?\!\!\!\!\!\!\!\!read(x,&space;\hat{x}_t,&space;h_{t-1}^{dec})&space;=&space;[x,&space;\hat{x}_t]\\write(h_t^{dec})&space;=&space;W(h_t^{dec})&space;" title="\!\!\!\!\!\!\!\!read(x, \hat{x}_t, h_{t-1}^{dec}) = [x, \hat{x}_t]\\write(h_t^{dec}) = W(h_t^{dec}) " />
+
+Refer to the [readme](https://github.com/simonamtoft/recurrence-and-attention-latent-variable-models#deep-recurrent-attentive-writer) of my GitHub repo where I implemented the DRAW model initially, for a more detailed explanation.
+
+#### Draw 2 (without error image)
+The first variation is the base attention DRAW implementation, but without computing the error image 
+
+The equations then become:
+
+#### Draw 3 (without canvas updates)
+
+The equations then become:
+
+#### Draw 4 (w/o error image and canvas updates)
+
+This variation combines the two previously mentioned variations, such that we have the base attention DRAW implementation, but without both the error image and having a canvas that iteratively updates for each timestep t.
+
+
 In addition to compare these different models, on different datasets, a comparison on the metrics of the DRAW model alongside with a couple of variations are made, in order to determine how important some of these model features are, evaluated on the binarized MNIST data. The different variations are:
 
 - draw2: Base attention DRAW implementation, without using the error image, making the read operation simply return x, thus the encoders input is then just x and the previous decoder output.
