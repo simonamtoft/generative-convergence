@@ -83,12 +83,19 @@ The equations then become:
 <img src="https://latex.codecogs.com/svg.image?\\&space;h_t^{enc}&space;=&space;RNN^{enc}(h_{t-1}^{enc},&space;[x,&space;h_{t-1}^{dec}])&space;\\z_t&space;\sim&space;Q(z_t&space;|&space;h_t^{enc})&space;\\h_t^{dec}&space;=&space;RNN^{dec}(h_{t-1}^{dec},&space;z_t)&space;\\c_t&space;=&space;c_{t-1}&space;&plus;&space;write(h_t^{dec})&space;&space;\\read(x,&space;\hat{x}_t,&space;h_{t-1}^{dec})&space;=&space;x&space;\\write(h_t^{dec})&space;=&space;W(h_t^{dec})&space;" title="\\ h_t^{enc} = RNN^{enc}(h_{t-1}^{enc}, [x, h_{t-1}^{dec}]) \\z_t \sim Q(z_t | h_t^{enc}) \\h_t^{dec} = RNN^{dec}(h_{t-1}^{dec}, z_t) \\c_t = c_{t-1} + write(h_t^{dec}) \\read(x, \hat{x}_t, h_{t-1}^{dec}) = x \\write(h_t^{dec}) = W(h_t^{dec}) " />
 
 #### Draw 3 (without canvas updates)
+The second variation is the base attention DRAW implementation, but without iteratively updating the canvas over the timesteps <img src="https://latex.codecogs.com/svg.image?\inline&space;t&space;\in&space;1,...,T" title="\inline t \in 1,...,T" />, but simply setting the canvas at each time-step to be the output of the decoder (after the write operation). 
 
 The equations then become:
 
+<img src="https://latex.codecogs.com/svg.image?\\&space;\hat{x}_t&space;=&space;x&space;-&space;\sigma(c_{t-1})\\r_t&space;=&space;read(x_t,&space;\hat{x}_t,&space;h_{t-1}^{dec})\\h_t^{enc}&space;=&space;RNN^{enc}(h_{t-1}^{enc},&space;[r_t,&space;h_{t-1}^{dec}])&space;\\z_t&space;\sim&space;Q(z_t&space;|&space;h_t^{enc})&space;\\h_t^{dec}&space;=&space;RNN^{dec}(h_{t-1}^{dec},&space;z_t)&space;\\c_t&space;=&space;write(h_t^{dec})&space;&space;\\read(x,&space;\hat{x}_t,&space;h_{t-1}^{dec})&space;=&space;[x,&space;\hat{x}_t]&space;\\write(h_t^{dec})&space;=&space;W(h_t^{dec})&space;" title="\\ \hat{x}_t = x - \sigma(c_{t-1})\\r_t = read(x_t, \hat{x}_t, h_{t-1}^{dec})\\h_t^{enc} = RNN^{enc}(h_{t-1}^{enc}, [r_t, h_{t-1}^{dec}]) \\z_t \sim Q(z_t | h_t^{enc}) \\h_t^{dec} = RNN^{dec}(h_{t-1}^{dec}, z_t) \\c_t = write(h_t^{dec}) \\read(x, \hat{x}_t, h_{t-1}^{dec}) = [x, \hat{x}_t] \\write(h_t^{dec}) = W(h_t^{dec}) " />
+
 #### Draw 4 (w/o error image and canvas updates)
 
-This variation combines the two previously mentioned variations, such that we have the base attention DRAW implementation, but without both the error image and having a canvas that iteratively updates for each timestep `t`.
+This variation combines the two previously mentioned variations, such that we have the base attention DRAW implementation, but without both the error image and having a canvas that iteratively updates for each timestep.
+
+The equations then become:
+
+<img src="https://latex.codecogs.com/svg.image?\\&space;h_t^{enc}&space;=&space;RNN^{enc}(h_{t-1}^{enc},&space;[x,&space;h_{t-1}^{dec}])&space;\\z_t&space;\sim&space;Q(z_t&space;|&space;h_t^{enc})&space;\\h_t^{dec}&space;=&space;RNN^{dec}(h_{t-1}^{dec},&space;z_t)&space;\\c_t&space;=&space;write(h_t^{dec})&space;&space;\\read(x,&space;\hat{x}_t,&space;h_{t-1}^{dec})&space;=&space;x&space;\\write(h_t^{dec})&space;=&space;W(h_t^{dec})&space;" title="\\ h_t^{enc} = RNN^{enc}(h_{t-1}^{enc}, [x, h_{t-1}^{dec}]) \\z_t \sim Q(z_t | h_t^{enc}) \\h_t^{dec} = RNN^{dec}(h_{t-1}^{dec}, z_t) \\c_t = write(h_t^{dec}) \\read(x, \hat{x}_t, h_{t-1}^{dec}) = x \\write(h_t^{dec}) = W(h_t^{dec}) " />
 
 
 #### Evaluating Performance of Variations
